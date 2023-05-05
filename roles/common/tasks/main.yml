@@ -60,7 +60,7 @@
         - "lame-devel"
       state: "latest"
 
-  - name: "Installing git package"
+  - name: "Installing git package"  # Must be installed already. This is here for consistency
     dnf:
       name: "git"
       state: "latest"
@@ -74,6 +74,21 @@
     template:
       src: "{{ playbook_dir }}/templates/git/config.j2"
       dest: "{{ global_home }}/.config/git/config"
+
+  - name: "Installing ansible package"  # Must be installed already. This is here for consistency
+    dnf:
+      name: "ansible"
+      state: "latest"
+
+  - name: "Installing neovim package"
+    dnf:
+      name: "neovim"
+      state: "latest"
+
+  - name: "Installing vlc flatpak"
+    flatpak:
+      name: "org.videolan.VLC"
+      state: "latest"
 
   rescue:
     - set_fact: task_failed = True
