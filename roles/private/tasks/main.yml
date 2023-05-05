@@ -1,0 +1,10 @@
+---
+- block:
+  - name: "Installing discord flatpak"
+    flatpak:
+      name: "com.discordapp.Discord"
+      state: "present"
+
+  rescue:
+    - set_fact: task_failed = True
+...

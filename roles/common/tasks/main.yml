@@ -1,0 +1,80 @@
+---
+- block:
+  - name: "Updating packages"
+    dnf:
+      name: "*"
+      state: "latest"
+
+  - name: "Installing distribution gpg key package"
+    dnf:
+      name: "distribution-gpg-keys"
+      state: "latest"
+
+  - name: "Importing free RPM Fusion repository gpg key"
+    rpm_key:
+      key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ansible_distribution_major_version}}"
+      state: "present"
+
+  - name: "Importing non-free RPM Fusion repository gpg key"
+    rpm_key:
+      key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-{{ansible_distribution_major_version}}"
+      state: "present"
+
+  - name: "Adding free RPM Fusion repository"
+    dnf:
+      name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+      state: "present"
+
+  - name: "Adding non-free RPM Fusion repository"
+    dnf:
+      name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+      state: "present"
+
+  - name: "Removing filtered fedora flathub remote"
+    flatpak_remote:
+      name: "fedora"
+      state: "absent"
+
+  - name: "Removing filtered fedora flathub testing remote"
+    flatpak_remote:
+      name: "fedora-testing"
+      state: "absent"
+
+  - name: "Adding unfiltered flathub remote"
+    flatpak_remote:
+      name: "flathub"
+      state: "present"
+      flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
+
+  - name: "Install multimedia codec packages"
+    dnf:
+      name:
+        - "gstreamer1-plugins-base"
+        - "gstreamer1-plugins-good-*"
+        - "gstreamer1-plugins-bad-*"
+        - "gstreamer1-plugin-openh264"
+        - "gstreamer1-libav"
+        - "lame*"
+      exclude:
+        - "gstreamer1-plugins-bad-free-devel"
+        - "lame-devel"
+      state: "latest"
+
+  - name: "Installing git package"
+    dnf:
+      name: "git"
+      state: "latest"
+
+  - name: "Ensuring directory for git configuration exists"
+    file:
+      path: "{{ global_home }}/.config/git"
+      state: "directory" 
+
+  - name: "Configuring git"
+    template:
+      src: "{{ playbook_dir }}/templates/git/config.j2"
+      dest: "{{ global_home }}/.config/git/config"
+
+  rescue:
+    - set_fact: task_failed = True
+...
