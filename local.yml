@@ -3,6 +3,7 @@
   hosts: "localhost"
   become: True
   vars:
+    global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
     global_editor: "{{ lookup('env', 'EDITOR') }}"
   vars_prompt:
@@ -21,6 +22,11 @@
     - name: "git_email_address"
       prompt: "Please enter the email address that should be used for git"
       private: False
+  pre_tasks:
+    - name: "Ensuring to not run as root"
+      fail:
+        msg: "This is not meant to be run as root. Please use a non root account and use --ask-become-pass to escalate privileges"
+      when: global_user == "root"
 
   tasks:
     - name: "Including common role"
