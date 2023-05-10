@@ -5,6 +5,19 @@
       name: "com.discordapp.Discord"
       state: "present"
 
+  - name: "Installing strongswan package"
+    dnf:
+      name: "strongswan"
+      state: "latest"
+
+  - name: "Configuring strongswan"
+    copy:
+      src: "{{ playbook_dir }}/files/strongswan/swanctl/{{ item }}"
+      dest: "/etc/strongswan/swanctl/conf.d/{{ item }}"
+    with_items:
+      - connections.conf
+      - debugging.conf
+
   rescue:
     - set_fact: task_failed = True
 ...
