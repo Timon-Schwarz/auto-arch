@@ -90,6 +90,25 @@
       name: "org.videolan.VLC"
       state: "present"
 
+  - name: "Ensuring font directory exists"
+    file:
+      path: "{{ global_home }}/.fonts"
+      state: "directory"
+  
+  - name: "Checking if Source Code Pro Nerd Font exists"
+    stat:
+      path: "{{ global_home }}/.fonts/SauceCodeProNerdFont*"
+    register: "nf_font_check"
+  
+  - name: "Installing Source Code Pro Nerd Font"
+    when: nf_font_check.stat.exists
+    unarchive:
+      src: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.0/SourceCodePro.zip"
+      dest: "{{ global_home }}/.fonts/"
+      remote_src: "True"
+
+
+
   rescue:
     - set_fact: task_failed = True
 ...
