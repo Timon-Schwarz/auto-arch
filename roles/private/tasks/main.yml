@@ -12,11 +12,13 @@
 
   - name: "Configuring strongswan"
     copy:
-      src: "{{ playbook_dir }}/files/strongswan/swanctl/{{ item }}"
-      dest: "/etc/strongswan/swanctl/conf.d/{{ item }}"
-    with_items:
-      - connections.conf
-      - debugging.conf
+      src: "{{ playbook_dir }}/files/strongswan/swanctl/{{ file }}"
+      dest: "/etc/strongswan/swanctl/conf.d/{{ file }}"
+    loop_control:
+      loop_var: "file"
+    loop:
+      - "connections.conf"
+      - "debugging.conf"
 
   rescue:
     - set_fact: task_failed = True
