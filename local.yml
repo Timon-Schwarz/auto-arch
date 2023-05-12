@@ -1,32 +1,95 @@
 ---
 - name: "Play | Running roles"
   hosts: "localhost"
+  gather_facts: "True"
   become: True
   vars:
     global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
     global_editor: "{{ lookup('env', 'EDITOR') }}"
-  vars_prompt:
-    - name: "is_work"
-      prompt: "Do you use this machine for work?"
-      private: False
-    - name: "is_private"
-      prompt: "Do you use this machine privately?"
-      private: False
-    - name: "is_laptop"
-      prompt: "Is this machine a laptop?"
-      private: "False"
-    - name: "git_user_name"
-      prompt: "Please enter the username that should be used for git"
-      private: "False"
-    - name: "git_email_address"
-      prompt: "Please enter the email address that should be used for git"
-      private: False
   pre_tasks:
     - name: "Ensuring to not run as root"
       fail:
         msg: "This is not meant to be run as root. Please use a non root account and use --ask-become-pass to escalate privileges"
       when: global_user == "root"
+
+    - name: "Ensuring host_vars folder exists"
+      file:
+        path: "{{ inventory_dir }}/host_vars"
+        state: "directory"
+  
+    - name: "Ensuring host_vars file exists"
+      file:
+        path: "{{ inventory_dir }}/host_vars/localhost"
+        state: "touch"
+        modification_time: "preserve"
+        access_time: "preserve"
+
+    - pause:
+        prompt: "Do you use this machine for work?"
+        echo: "True"
+      register: "prompt_is_work"
+      when: is_work is undefined
+
+    - set_fact:
+        is_work: "{{ prompt_is_work.user_input }}"
+      when: is_work is undefined
+
+    - pause:
+        prompt: "Do you use this machine privately?"
+        echo: "True"
+      register: "prompt_is_private"
+      when: is_private is undefined
+
+    - set_fact:
+        is_private: "{{ prompt_is_private.user_input }}"
+      when: is_private is undefined
+
+    - pause:
+        prompt: "Is this machine a laptop?"
+        echo: "True"
+      register: "prompt_is_laptop"
+      when: is_laptop is undefined
+
+    - set_fact:
+        is_laptop: "{{ prompt_is_laptop.user_input }}"
+      when: is_laptop is undefined
+
+    - pause:
+        prompt: "Please enter the username that should be used for git"
+        echo: "True"
+      register: "prompt_git_username"
+      when: git_username is undefined
+
+    - set_fact:
+        git_username: "{{ prompt_git_username.user_input }}"
+      when: git_username is undefined
+
+    - pause:
+        prompt: "Please enter the email address that should be used for git"
+        echo: "True"
+      register: "prompt_git_email"
+      when: git_email is undefined
+
+    - set_fact:
+        git_email: "{{ prompt_git_email.user_input }}"
+      when: git_email is undefined
+
+    - name: "Updating host_vars files"
+      lineinfile:
+        dest: "{{ inventory_dir }}/host_vars/localhost"
+        regexp: "{{ var.name }}:"
+        line: "{{ var.name }}: {{ var.value }}"
+      loop_control:
+        loop_var: "var"
+      loop:
+        - { "name": "is_work", "value": "{{ is_work }}" }
+        - { "name": "is_private", "value": "{{ is_private }}" }
+        - { "name": "is_laptop", "value": "{{ is_laptop }}" }
+        - { "name": "git_username", "value": "{{ git_username }}" }
+        - { "name": "git_email", "value": "{{ git_email }}" }
+
+
 
   tasks:
     - name: "Including common role"
