@@ -1,0 +1,7 @@
+# Ingnore content of host_vars
+# These files should be generated dynamically by the playbook using prompts
+host_vars
+
+# Sometimes creating a quick copy of a file as a backup can be helpfull
+# We do not want to track any of these files 
+*.bak
