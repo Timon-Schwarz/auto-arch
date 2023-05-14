@@ -5,6 +5,12 @@
       name: "*"
       state: "latest"
 
+  - name: "Updating flatpaks"
+    command:
+      cmd: "flatpak update --noninteractive"
+    register: flatpak_update_results
+    changed_when: "'Nothing to do' not in flatpak_update_results.stdout"
+
   - name: "Installing distribution gpg key package"
     dnf:
       name: "distribution-gpg-keys"
