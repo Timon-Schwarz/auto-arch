@@ -12,13 +12,32 @@
 
   - name: "Configuring strongswan"
     copy:
-      src: "{{ playbook_dir }}/files/strongswan/swanctl/{{ file }}"
-      dest: "/etc/strongswan/swanctl/conf.d/{{ file }}"
-    loop_control:
-      loop_var: "file"
-    loop:
-      - "connections.conf"
-      - "debugging.conf"
+      src: "{{ item }}"
+      dest: "/etc/strongswan/swanctl/conf.d/"
+    with_fileglob: "{{ playbook_dir }}/files/strongswan/swanctl/*.conf"
+
+  - name: "Importing strongswan secrets"
+    copy:
+      src: "{{ item }}"
+      dest: "/etc/strongswan/swanctl/conf.d/"
+      owner: "root"
+      mode: 0600
+    with_fileglob: "{{ strongswan_secret_dir }}/*.conf"
+    when:
+      - is_strongswan_secret_imported is undefined
+      - strongswan_secret_dir != ""
+    register: strongswan_secret_dir_results
+
+  - name: "Updating host_vars files"
+    lineinfile:
+      dest: "{{ inventory_dir }}/host_vars/localhost"
+      regexp: "is_strongswan_secret_imported:"
+      line: "is_strongswan_secret_imported: True"
+    when:
+      - strongswan_secret_dir_results is not failed
+      - strongswan_secret_dir_results is not skipped
+
+
 
   rescue:
     - set_fact: task_failed = True

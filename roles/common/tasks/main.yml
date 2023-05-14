@@ -75,6 +75,37 @@
       src: "{{ playbook_dir }}/templates/git/config.j2"
       dest: "{{ global_home }}/.config/git/config"
 
+  - name: "Installing ssh package"
+    dnf:
+      name: "openssh"
+      state: "latest"
+
+  - name: "Importing ssh keys"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ global_home }}/.ssh/"
+      owner: "{{ global_user }}"
+      mode: 0600
+    with_fileglob: "{{ ssh_key_dir }}/*key*"
+    when:
+      - is_ssh_key_imported is undefined
+      - ssh_key_dir != ""
+    register: ssh_key_dir_results
+
+  - name: "Configuring ssh"
+    template:
+      src: "{{ playbook_dir }}/templates/ssh/config.j2"
+      dest: "{{ global_home }}/.ssh/config"
+
+  - name: "Updating host_vars files"
+    lineinfile:
+      dest: "{{ inventory_dir }}/host_vars/localhost"
+      regexp: "is_ssh_key_imported:"
+      line: "is_ssh_key_imported: True"
+    when:
+      - ssh_key_dir_results is not failed
+      - ssh_key_dir_results is not skipped
+
   - name: "Installing ansible package"  # Must be installed already. This is here for consistency
     dnf:
       name: "ansible"

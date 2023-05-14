@@ -56,6 +56,16 @@
       when: is_laptop is undefined
 
     - pause:
+        prompt: "Please enter the path to the folder containing your ssh keys [Press enter to skip]" 
+        echo: "True"
+      register: "prompt_ssh_key_dir"
+      when: is_ssh_key_imported is undefined
+
+    - set_fact:
+        ssh_key_dir: "{{ prompt_ssh_key_dir.user_input }}"
+      when: is_ssh_key_imported is undefined
+
+    - pause:
         prompt: "Please enter the username that should be used for git"
         echo: "True"
       register: "prompt_git_username"
@@ -75,6 +85,30 @@
         git_email: "{{ prompt_git_email.user_input }}"
       when: git_email is undefined
 
+    - pause:
+        prompt: "Please enter the private key name that should be used for git"
+        echo: "True"
+      register: "prompt_git_key_name"
+      when: git_key_name is undefined
+
+    - set_fact:
+        git_key_name: "{{ prompt_git_key_name.user_input }}"
+      when: git_key_name is undefined
+
+    - pause:
+        prompt: "Please enter the path to the folder containing your strongswan secrets [Press enter to skip]" 
+        echo: "True"
+      register: "prompt_strongswan_secret_dir"
+      when: 
+        - is_private | bool
+        - is_strongswan_secret_imported is undefined
+
+    - set_fact:
+        strongswan_secret_dir: "{{ prompt_strongswan_secret_dir.user_input }}"
+      when: 
+        - is_private | bool
+        - is_strongswan_secret_imported is undefined
+
     - name: "Updating host_vars files"
       lineinfile:
         dest: "{{ inventory_dir }}/host_vars/localhost"
@@ -88,6 +122,7 @@
         - { "name": "is_laptop", "value": "{{ is_laptop }}" }
         - { "name": "git_username", "value": "{{ git_username }}" }
         - { "name": "git_email", "value": "{{ git_email }}" }
+        - { "name": "git_key_name", "value": "{{ git_key_name }}" }
 
 
 
