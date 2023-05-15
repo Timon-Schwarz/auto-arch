@@ -8,7 +8,7 @@
   - name: "Updating flatpaks"
     command:
       cmd: "flatpak update --noninteractive"
-    register: flatpak_update_results
+    register: "flatpak_update_results"
     changed_when: "'Nothing to do' not in flatpak_update_results.stdout"
 
   - name: "Installing distribution gpg key package"
@@ -73,13 +73,13 @@
 
   - name: "Ensuring directory for git configuration exists"
     file:
-      path: "{{ global_home }}/.config/git"
+      path: "{{ [global_home, '.config/git'] | path_join }}"
       state: "directory" 
 
   - name: "Configuring git"
     template:
-      src: "{{ playbook_dir }}/templates/git/config.j2"
-      dest: "{{ global_home }}/.config/git/config"
+      src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
+      dest: "{{ [global_home, '.config/git/config'] | path_join }}"
 
   - name: "Installing ssh package"
     dnf:
@@ -89,10 +89,10 @@
   - name: "Importing ssh keys"
     copy:
       src: "{{ item }}"
-      dest: "{{ global_home }}/.ssh/"
+      dest: "{{ [global_home, '.ssh/'] | path_join }}"
       owner: "{{ global_user }}"
       mode: 0600
-    with_fileglob: "{{ ssh_key_dir }}/*key*"
+    with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join"
     when:
       - is_ssh_key_imported is undefined
       - ssh_key_dir != ""
@@ -100,12 +100,12 @@
 
   - name: "Configuring ssh"
     template:
-      src: "{{ playbook_dir }}/templates/ssh/config.j2"
-      dest: "{{ global_home }}/.ssh/config"
+      src: "{{ [playbook_dir, 'templates/ssh/config.j2'] | path_join }}"
+      dest: "{{ [global_home, '.ssh/config'] | path_join }}"
 
   - name: "Updating host_vars files"
     lineinfile:
-      dest: "{{ inventory_dir }}/host_vars/localhost"
+      dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
       regexp: "is_ssh_key_imported:"
       line: "is_ssh_key_imported: True"
     when:
@@ -129,19 +129,19 @@
 
   - name: "Ensuring font directory exists"
     file:
-      path: "{{ global_home }}/.fonts"
+      path: "{{ [global_home, '.fonts'] | path_join }}"
       state: "directory"
   
   - name: "Checking if Source Code Pro Nerd Font exists"
     stat:
-      path: "{{ global_home }}/.fonts/SauceCodeProNerdFont*"
+      path: "{{ [global_home, '.fonts/SauceCodeProNerdFont*'] | path_join }}"
     register: "nf_font_check"
   
   - name: "Installing Source Code Pro Nerd Font"
     when: nf_font_check.stat.exists
     unarchive:
       src: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.0/SourceCodePro.zip"
-      dest: "{{ global_home }}/.fonts/"
+      dest: "{{ [global_home, '.fonts/'] | path_join }}"
       remote_src: "True"
 
 

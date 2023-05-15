@@ -4,10 +4,37 @@
   gather_facts: "True"
   become: True
   vars:
+    bool_strings:
+      - "y"
+      - "Y"
+      - "yes"
+      - "Yes"
+      - "YES"
+      - "n"
+      - "N"
+      - "no"
+      - "No"
+      - "NO"
+      - "true"
+      - "True"
+      - "TRUE"
+      - "false"
+      - "False"
+      - "FALSE"
+      - "on"
+      - "On"
+      - "ON"
+      - "off"
+      - "Off"
+      - "OFF"
     global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
     global_editor: "{{ lookup('env', 'EDITOR') }}"
   pre_tasks:
+    - name: "debug"
+      debug:
+        var: bool_strings
+
     - name: "Ensuring to not run as root"
       fail:
         msg: "This is not meant to be run as root. Please use a non root account and use --ask-become-pass to escalate privileges"
@@ -26,30 +53,39 @@
         access_time: "preserve"
 
     - pause:
-        prompt: "Do you use this machine for work?"
+        prompt: "Do you use this machine for work? (Yes/No)"
         echo: "True"
       register: "prompt_is_work"
       when: is_work is undefined
+      until: prompt_is_work.user_input in bool_strings
+      retries: 3
+      delay: 0
 
     - set_fact:
         is_work: "{{ prompt_is_work.user_input }}"
       when: is_work is undefined
 
     - pause:
-        prompt: "Do you use this machine privately?"
+        prompt: "Do you use this machine privately? (Yes/No)"
         echo: "True"
       register: "prompt_is_private"
       when: is_private is undefined
+      until: prompt_is_private.user_input in bool_strings
+      retries: 3
+      delay: 0
 
     - set_fact:
         is_private: "{{ prompt_is_private.user_input }}"
       when: is_private is undefined
 
     - pause:
-        prompt: "Is this machine a laptop?"
+        prompt: "Is this machine a laptop? (Yes/No)"
         echo: "True"
       register: "prompt_is_laptop"
       when: is_laptop is undefined
+      until: prompt_is_laptop.user_input in bool_strings
+      retries: 3
+      delay: 0
 
     - set_fact:
         is_laptop: "{{ prompt_is_laptop.user_input }}"
@@ -60,6 +96,7 @@
         echo: "True"
       register: "prompt_ssh_key_dir"
       when: is_ssh_key_imported is undefined
+      until: prompt_ssh_key_dir.user_input is directory
 
     - set_fact:
         ssh_key_dir: "{{ prompt_ssh_key_dir.user_input }}"
@@ -102,6 +139,7 @@
       when: 
         - is_private | bool
         - is_strongswan_secret_imported is undefined
+      until: prompt_strongswan_secret_dir is directory
 
     - set_fact:
         strongswan_secret_dir: "{{ prompt_strongswan_secret_dir.user_input }}"
