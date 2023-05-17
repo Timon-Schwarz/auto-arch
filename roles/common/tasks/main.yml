@@ -92,7 +92,7 @@
       dest: "{{ [global_home, '.ssh/'] | path_join }}"
       owner: "{{ global_user }}"
       mode: 0600
-    with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join"
+    with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join }}"
     when:
       - is_ssh_key_imported is undefined
       - ssh_key_dir != ""
@@ -134,17 +134,86 @@
   
   - name: "Checking if Source Code Pro Nerd Font exists"
     stat:
-      path: "{{ [global_home, '.fonts/SauceCodeProNerdFont*'] | path_join }}"
+      path: "{{ [global_home, '.fonts/SauceCodeProNerdFontMono-Regular.ttf'] | path_join }}"
     register: "nf_font_check"
   
   - name: "Installing Source Code Pro Nerd Font"
-    when: nf_font_check.stat.exists
+    when: not nf_font_check.stat.exists
     unarchive:
       src: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.0/SourceCodePro.zip"
       dest: "{{ [global_home, '.fonts/'] | path_join }}"
       remote_src: "True"
 
+  - name: "Configuring bash"
+    template:
+      src: "{{ [playbook_dir, 'templates/bash/bashrc.j2'] | path_join }}"
+      dest: "{{ [global_home, '.bashrc'] | path_join }}"
 
+  - name: "Installing zsh package"
+    dnf:
+      name: "zsh"
+      state: "latest"
+
+  - name: "Ensuring directory for zsh configuration exists"
+    file:
+      path: "{{ [global_home, '.config/zsh'] | path_join }}"
+      state: "directory" 
+
+  - name: "Configuring zsh"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ [global_home, '.config/zsh/'] | path_join }}"
+    with_fileglob:
+      - "{{ [playbook_dir, 'files/zsh/*'] | path_join }}"
+      - "{{ [playbook_dir, 'files/zsh/.*'] | path_join }}"
+
+  - name: "Installing powerline10k zsh plugin"
+    git:
+      repo: "https://github.com/romkatv/powerlevel10k.git"
+      dest: "{{ [global_home, '.config/zsh/powerlevel10k'] | path_join }}"
+      clone: True
+      update: True
+      depth: 1
+
+  - name: "Installing syntax-highlighting zsh plugin"
+    git:
+      repo: "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+      dest: "{{ [global_home, '.config/zsh/zsh-syntax-highlighting'] | path_join }}"
+      clone: True
+      update: True
+
+  - name: "Installing zsh-autosuggestions zsh plugin"
+    git:
+      repo: "https://github.com/zsh-users/zsh-autosuggestions"
+      dest: "{{ [global_home, '.config/zsh/zsh-autosuggestions'] | path_join }}"
+      clone: True
+      update: True
+
+  - name: "Installing alacritty package"
+    dnf:
+      name: "alacritty"
+      state: "latest"
+
+  - name: "Configuring alacritty"
+    copy:
+      src: "{{ item }}"
+      dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
+    with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
+
+      #  - name: "Installing lightly kde application theme package"
+      #    dnf:
+      #      name: "lightly"
+      #      state: "latest"
+      #    register: kde_lightly_results
+      #
+      #  - name: "Installing catppuccin kde theme"
+      #    git:
+      #      repo: "https://github.com/catppuccin/kde"
+      #      dest: "{{ [global_home, '.config/kde/catppuccin-kde'] | path_join }}"
+      #      clone: True
+      #      update: True
+      #      depth: 1
+      #    register: kde_catppuccin_results
 
   rescue:
     - set_fact: task_failed = True

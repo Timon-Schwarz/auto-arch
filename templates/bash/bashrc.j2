@@ -1,0 +1,43 @@
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# User specific environment
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]
+then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+
+
+#########################
+# Environment variables #
+#########################
+# Home cleanup
+export ZDOTDIR="$HOME/.config/zsh"
+
+# Default programs
+export TERMINAL="{{ global_terminal }}"
+export PAGER="{{ global_pager }}"
+export EDITOR="{{ global_editor }}"
+export VISUAL="{{ global_visual }}"
+export BROWSER="{{ global_browser }}"
+export READER="{{ global_reader }}"
+export FILEMANAGER="{{ global_filemanager }}"
+export CM_LAUNCHER="{{ global_cm_launcher }}"
+
+# Export other environment variables
+export LIBVIRT_DEFAULT_URI="qemu:///system"
+export HISTSIZE="10000"
+export HISTFILESIZE="10000"
+
+
+
+#########
+# Alias #
+#########
+# Allows aliases to be run with sudo
+alias sudo="sudo "
+alias vim="nvim"

@@ -29,12 +29,15 @@
       - "OFF"
     global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
-    global_editor: "{{ lookup('env', 'EDITOR') }}"
+    global_editor: "nvim"
+    global_visual: "nvim"
+    global_terminal: "alacritty"
+    global_pager: "less"
+    global_browser: "firefox"
+    global_reader: "okular"
+    global_filemanager: "dolphin"
+    global_cm_launcher: "rofi"
   pre_tasks:
-    - name: "debug"
-      debug:
-        var: bool_strings
-
     - name: "Ensuring to not run as root"
       fail:
         msg: "This is not meant to be run as root. Please use a non root account and use --ask-become-pass to escalate privileges"
@@ -42,15 +45,17 @@
 
     - name: "Ensuring host_vars folder exists"
       file:
-        path: "{{ inventory_dir }}/host_vars"
+        path: "{{ [inventory_dir, 'host_vars'] | path_join }}"
         state: "directory"
   
     - name: "Ensuring host_vars file exists"
       file:
-        path: "{{ inventory_dir }}/host_vars/localhost"
+        path: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
         state: "touch"
         modification_time: "preserve"
         access_time: "preserve"
+        owner: "{{ global_user }}"
+        group: "{{ global_user }}"
 
     - pause:
         prompt: "Do you use this machine for work? (Yes/No)"
@@ -153,7 +158,7 @@
 
     - name: "Updating host_vars files"
       lineinfile:
-        dest: "{{ inventory_dir }}/host_vars/localhost"
+        dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
         regexp: "{{ var.name }}:"
         line: "{{ var.name }}: {{ var.value }}"
       loop_control:
