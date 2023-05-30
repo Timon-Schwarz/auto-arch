@@ -235,6 +235,7 @@
       #    copy:
       #      src: "{{ [playbook_dir, 'files/vmware_workstation/99-vmmodules.install'] | path_join }}"
       #      dest: "/etc/kernel/install.d/99-vmmodules.install"
+      #
 
   rescue:
     - set_fact: task_failed = True
