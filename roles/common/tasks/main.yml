@@ -200,6 +200,12 @@
       dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
     with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
 
+  - name: "Copying desktop wallpapers"
+    copy:
+      src: "{{ item }}"
+      dest: "/usr/share/wallpapers/custom/"
+    with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
+
       #  - name: "Installing lightly kde application theme package"
       #    dnf:
       #      name: "lightly"
@@ -214,6 +220,21 @@
       #      update: True
       #      depth: 1
       #    register: kde_catppuccin_results
+
+      #  - name: "Installing additional packages to build VMware Workstation kernel updates"
+      #    dnf:
+      #      name:
+      #        - "kernel-devel"
+      #        - "kernel-headers"
+      #        - "gcc"
+      #        - "gcc-c++"
+      #        - "make"
+      #      state: "latest"
+      #
+      #  - name: "Copying VMware Workstation kernel update script"
+      #    copy:
+      #      src: "{{ [playbook_dir, 'files/vmware_workstation/99-vmmodules.install'] | path_join }}"
+      #      dest: "/etc/kernel/install.d/99-vmmodules.install"
 
   rescue:
     - set_fact: task_failed = True
