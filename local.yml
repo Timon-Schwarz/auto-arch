@@ -156,6 +156,18 @@
         - is_private | bool
         - is_strongswan_secret_imported is undefined
 
+    - pause:
+        prompt: "Please enter the vmware workstation version to use"
+        echo: "True"
+      register: "prompt_vmware_version"
+      when: 
+        - vmware_version is undefined
+
+    - set_fact:
+        vmware_version: "{{ prompt_vmware_version.user_input }}"
+      when: 
+        - vmware_version is undefined
+
     - name: "Updating host_vars files"
       lineinfile:
         dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
@@ -170,6 +182,7 @@
         - { "name": "git_username", "value": "{{ git_username }}" }
         - { "name": "git_email", "value": "{{ git_email }}" }
         - { "name": "git_key_name", "value": "{{ git_key_name }}" }
+        - { "name": "vmware_version", "value": "{{ vmware_version }}" }
 
 
 
