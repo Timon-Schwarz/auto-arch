@@ -122,6 +122,11 @@
       name: "neovim"
       state: "latest"
 
+  - name: "Installing additional libreoffice language packages"
+    dnf:
+      name: "libreoffice-langpack-de"
+      state: "latest"
+
   - name: "Installing vlc flatpak"
     flatpak:
       name: "org.videolan.VLC"
