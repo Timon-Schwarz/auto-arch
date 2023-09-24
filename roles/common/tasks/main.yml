@@ -1,278 +1,388 @@
 ---
 - block:
-  - name: "Updating packages"
-    dnf:
-      name: "*"
-      state: "latest"
+    - name: "Updating packages"
+      dnf:
+        name: "*"
+        state: "latest"
 
-  - name: "Updating flatpaks"
-    command:
-      cmd: "flatpak update --noninteractive"
-    register: "flatpak_update_results"
-    changed_when: "'Nothing to do' not in flatpak_update_results.stdout"
+    - name: "Updating flatpaks"
+      command:
+        cmd: "flatpak update --noninteractive"
+      register: "flatpak_update_results"
+      changed_when: "'Nothing to do' not in flatpak_update_results.stdout"
 
-  - name: "Installing distribution gpg key package"
-    dnf:
-      name: "distribution-gpg-keys"
-      state: "latest"
+    - name: "Installing distribution gpg key package"
+      dnf:
+        name: "distribution-gpg-keys"
+        state: "latest"
 
-  - name: "Importing free RPM Fusion repository gpg key"
-    rpm_key:
-      key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ansible_distribution_major_version}}"
-      state: "present"
+    - name: "Importing free RPM Fusion repository gpg key"
+      rpm_key:
+        key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ansible_distribution_major_version}}"
+        state: "present"
 
-  - name: "Importing non-free RPM Fusion repository gpg key"
-    rpm_key:
-      key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-{{ansible_distribution_major_version}}"
-      state: "present"
+    - name: "Importing non-free RPM Fusion repository gpg key"
+      rpm_key:
+        key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-{{ansible_distribution_major_version}}"
+        state: "present"
 
-  - name: "Adding free RPM Fusion repository"
-    dnf:
-      name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
-      state: "present"
+    - name: "Adding free RPM Fusion repository"
+      dnf:
+        name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+        state: "present"
 
-  - name: "Adding non-free RPM Fusion repository"
-    dnf:
-      name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
-      state: "present"
+    - name: "Adding non-free RPM Fusion repository"
+      dnf:
+        name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+        state: "present"
 
-  - name: "Removing filtered fedora flathub remote"
-    flatpak_remote:
-      name: "fedora"
-      state: "absent"
+    - name: "Removing filtered fedora flathub remote"
+      flatpak_remote:
+        name: "fedora"
+        state: "absent"
 
-  - name: "Removing filtered fedora flathub testing remote"
-    flatpak_remote:
-      name: "fedora-testing"
-      state: "absent"
+    - name: "Removing filtered fedora flathub testing remote"
+      flatpak_remote:
+        name: "fedora-testing"
+        state: "absent"
 
-  - name: "Adding unfiltered flathub remote"
-    flatpak_remote:
-      name: "flathub"
-      state: "present"
-      flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
+    - name: "Adding unfiltered flathub remote"
+      flatpak_remote:
+        name: "flathub"
+        state: "present"
+        flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
 
-  - name: "Install multimedia codec packages"
-    dnf:
-      name:
-        - "gstreamer1-plugins-base"
-        - "gstreamer1-plugins-good-*"
-        - "gstreamer1-plugins-bad-*"
-        - "gstreamer1-plugin-openh264"
-        - "gstreamer1-libav"
-        - "lame*"
-      exclude:
-        - "gstreamer1-plugins-bad-free-devel"
-        - "lame-devel"
-      state: "latest"
+    - name: "Installing ansible package" # Must be installed already. This is here for consistency
+      dnf:
+        name: "ansible"
+        state: "latest"
 
-  - name: "Installing git package"  # Must be installed already. This is here for consistency
-    dnf:
-      name: "git"
-      state: "latest"
+    - name: "Installing git package" # Must be installed already. This is here for consistency
+      dnf:
+        name: "git"
+        state: "latest"
 
-  - name: "Ensuring directory for git configuration exists"
-    file:
-      path: "{{ [global_home, '.config/git'] | path_join }}"
-      state: "directory" 
+    - name: Enable copr for lazygit
+      community.general.copr:
+        name: atim/lazygit
+        state: enabled
 
-  - name: "Configuring git"
-    template:
-      src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
-      dest: "{{ [global_home, '.config/git/config'] | path_join }}"
+    - name: Installing lazygit
+      dnf:
+        name: lazygit
+        state: latest
 
-  - name: "Installing ssh package"
-    dnf:
-      name: "openssh"
-      state: "latest"
+    - name: "Ensuring directory for git configuration exists"
+      file:
+        path: "{{ [global_home, '.config/git'] | path_join }}"
+        state: "directory"
 
-  - name: "Importing ssh keys"
-    copy:
-      src: "{{ item }}"
-      dest: "{{ [global_home, '.ssh/'] | path_join }}"
-      owner: "{{ global_user }}"
-      mode: 0600
-    with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join }}"
-    when:
-      - is_ssh_key_imported is undefined
-      - ssh_key_dir != ""
-    register: ssh_key_dir_results
+    - name: "Configuring git"
+      template:
+        src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
+        dest: "{{ [global_home, '.config/git/config'] | path_join }}"
 
-  - name: "Configuring ssh"
-    template:
-      src: "{{ [playbook_dir, 'templates/ssh/config.j2'] | path_join }}"
-      dest: "{{ [global_home, '.ssh/config'] | path_join }}"
+    - name: "Installing ssh package"
+      dnf:
+        name: "openssh"
+        state: "latest"
 
-  - name: "Updating host_vars files"
-    lineinfile:
-      dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
-      regexp: "is_ssh_key_imported:"
-      line: "is_ssh_key_imported: True"
-    when:
-      - ssh_key_dir_results is not failed
-      - ssh_key_dir_results is not skipped
+    - name: "Importing ssh keys"
+      copy:
+        src: "{{ item }}"
+        dest: "{{ [global_home, '.ssh/'] | path_join }}"
+        owner: "{{ global_user }}"
+        mode: 0600
+      with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join }}"
+      when:
+        - is_ssh_key_imported is undefined
+        - ssh_key_dir != ""
+      register: ssh_key_dir_results
 
-  - name: "Installing ansible package"  # Must be installed already. This is here for consistency
-    dnf:
-      name: "ansible"
-      state: "latest"
+    - name: "Configuring ssh"
+      template:
+        src: "{{ [playbook_dir, 'templates/ssh/config.j2'] | path_join }}"
+        dest: "{{ [global_home, '.ssh/config'] | path_join }}"
 
-  - name: "Installing neovim package"
-    dnf:
-      name: "neovim"
-      state: "latest"
+    - name: "Updating host_vars files"
+      lineinfile:
+        dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
+        regexp: "is_ssh_key_imported:"
+        line: "is_ssh_key_imported: True"
+      when:
+        - ssh_key_dir_results is not failed
+        - ssh_key_dir_results is not skipped
 
-  - name: "Installing additional libreoffice language packages"
-    dnf:
-      name: "libreoffice-langpack-de"
-      state: "latest"
+    - name: "Install multimedia codec packages"
+      dnf:
+        name:
+          - "gstreamer1-plugins-base"
+          - "gstreamer1-plugins-good-*"
+          - "gstreamer1-plugins-bad-*"
+          - "gstreamer1-plugin-openh264"
+          - "gstreamer1-libav"
+          - "lame*"
+        exclude:
+          - "gstreamer1-plugins-bad-free-devel"
+          - "lame-devel"
+        state: "latest"
 
-  - name: "Installing vlc flatpak"
-    flatpak:
-      name: "org.videolan.VLC"
-      state: "present"
+    - name: "Install the 'Development tools' package group"
+      ansible.builtin.dnf:
+        name: "@Development tools"
+        state: "latest"
 
-  - name: "Ensuring font directory exists"
-    file:
-      path: "{{ [global_home, '.fonts'] | path_join }}"
-      state: "directory"
-  
-  - name: "Checking if Source Code Pro Nerd Font exists"
-    stat:
-      path: "{{ [global_home, '.fonts/SauceCodeProNerdFontMono-Regular.ttf'] | path_join }}"
-    register: "nf_font_check"
-  
-  - name: "Installing Source Code Pro Nerd Font"
-    when: not nf_font_check.stat.exists
-    unarchive:
-      src: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.0/SourceCodePro.zip"
-      dest: "{{ [global_home, '.fonts/'] | path_join }}"
-      remote_src: "True"
+    - name: "Installing c++ compiler package"
+      dnf:
+        name: "gcc-c++"
+        state: "latest"
 
-  - name: "Configuring bash"
-    template:
-      src: "{{ [playbook_dir, 'templates/bash/bashrc.j2'] | path_join }}"
-      dest: "{{ [global_home, '.bashrc'] | path_join }}"
+    - name: "Installing ripgrep"
+      dnf:
+        name: "ripgrep"
+        state: "latest"
 
-  - name: "Installing zsh package"
-    dnf:
-      name: "zsh"
-      state: "latest"
+    - name: "Installing fd-find"
+      dnf:
+        name: "fd-find"
+        state: "latest"
 
-  - name: "Ensuring directory for zsh configuration exists"
-    file:
-      path: "{{ [global_home, '.config/zsh'] | path_join }}"
-      state: "directory" 
+    - name: "Installing pip package"
+      dnf:
+        name: "pip"
+        state: "latest"
 
-  - name: "Configuring zsh"
-    copy:
-      src: "{{ item }}"
-      dest: "{{ [global_home, '.config/zsh/'] | path_join }}"
-    with_fileglob:
-      - "{{ [playbook_dir, 'files/zsh/*'] | path_join }}"
-      - "{{ [playbook_dir, 'files/zsh/.*'] | path_join }}"
+    - name: "Installing fish package"
+      dnf:
+        name: "fish"
+        state: "latest"
 
-  - name: "Installing powerline10k zsh plugin"
-    git:
-      repo: "https://github.com/romkatv/powerlevel10k.git"
-      dest: "{{ [global_home, '.config/zsh/powerlevel10k'] | path_join }}"
-      clone: True
-      update: True
-      depth: 1
+    - name: "Installing ruby package"
+      dnf:
+        name: "ruby-devel"
+        state: "latest"
 
-  - name: "Installing syntax-highlighting zsh plugin"
-    git:
-      repo: "https://github.com/zsh-users/zsh-syntax-highlighting.git"
-      dest: "{{ [global_home, '.config/zsh/zsh-syntax-highlighting'] | path_join }}"
-      clone: True
-      update: True
+    - name: "Installing ruby neovim package"
+      community.general.gem:
+        name: "neovim"
+        state: "latest"
+        user_install: false
 
-  - name: "Installing zsh-autosuggestions zsh plugin"
-    git:
-      repo: "https://github.com/zsh-users/zsh-autosuggestions"
-      dest: "{{ [global_home, '.config/zsh/zsh-autosuggestions'] | path_join }}"
-      clone: True
-      update: True
+    - name: "Installing full latex package"
+      dnf:
+        name: "texlive-scheme-full"
+        state: "latest"
 
-  - name: "Installing alacritty package"
-    dnf:
-      name: "alacritty"
-      state: "latest"
+    - name: "Installing nodejs package"
+      dnf:
+        name: "nodejs"
+        state: "latest"
 
-  - name: "Configuring alacritty"
-    copy:
-      src: "{{ item }}"
-      dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
-    with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
+    - name: "Installing golang package"
+      dnf:
+        name: "golang"
+        state: "latest"
 
-  - name: "Copying desktop wallpapers"
-    copy:
-      src: "{{ item }}"
-      dest: "/usr/share/wallpapers/custom/"
-    with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
+    - name: "Installing rust package"
+      dnf:
+        name: "rust"
+        state: "latest"
 
-  - name: "Installing lightly kde application theme package"
-    dnf:
-      name: "lightly"
-      state: "latest"
-    register: kde_lightly_results
+    - name: "Installing cargo package"
+      dnf:
+        name: "cargo"
+        state: "latest"
 
-  - name: "Installing catppuccin kde theme"
-    git:
-      repo: "https://github.com/catppuccin/kde"
-      dest: "{{ [global_home, '.config/kde/catppuccin-kde'] | path_join }}"
-      clone: True
-      update: True
-      depth: 1
-    register: kde_catppuccin_results
+    - name: "Installing julia package"
+      dnf:
+        name: "julia"
+        state: "latest"
 
-# manually select lightly as style for application, plasma and window decorations
-# manully execute catppuccin colorscheme installer to set catppuccin as color scheme
+    - name: "Installing lua package"
+      dnf:
+        name: "lua"
+        state: "latest"
 
-      #  - name: "Installing additional packages to build VMware Workstation kernel updates"
-      #    dnf:
-      #      name:
-      #        - "kernel-devel"
-      #        - "kernel-headers"
-      #        - "gcc"
-      #        - "gcc-c++"
-      #        - "make"
-      #      state: "latest"
-      #
-      #      # Download official bundle
-      #      # sudo ./VMware-Workstation-Full-16.2.5-20904516.x86_64.bundle --deferred-gtk --eulas-agreed
-      #
-      #  - name: "Copying VMware Workstation kernel update script"
-      #    copy:
-      #      src: "{{ [playbook_dir, 'files/vmware_workstation/99-vmmodules.install'] | path_join }}"
-      #      dest: "/etc/kernel/install.d/99-vmmodules.install"
-      #
-      #  - name: "Getting VMware Workstation version"
-      #    shell: "cat /etc/vmware/config | grep player.product.version | sed '/.*\"\(.*\)\".*/ s//\1/g'"
-      #    changed_when: False
-      #    register: vmware_version_check
-      #
-      #  - set_fact:
-      #      vmware_version: "{{ vmware_version_check.stdout }}"
-      #
-      #  - name: "Installing vmware host modules"
-      #    git:
-      #      repo: "https://github.com/mkubecek/vmware-host-modules.git"
-      #      dest: "/opt/vmware-host-modules"
-      #      clone: True
-      #      update: True
-      #      single_branch: True
-      #      version: "workstation-{{ vmware_version }}"
-      #
-      #  - name: "Make VMware Workstation modules"
-      #    make:
-      #      chdir: "/opt/vmware-host-modules"
-      #  
-      #  - name: "Make install VMware Workstation modules"
-      #    make:
-      #      chdir: "/opt/vmware-host-modules"
-      #      target: "install"
+    - name: "Installing luarocks package"
+      dnf:
+        name: "luarocks"
+        state: "latest"
+
+    - name: "Installing java-dev package"
+      dnf:
+        name: "java-latest-openjdk-devel"
+        state: "latest"
+
+    - name: Install neovim node.js package.
+      community.general.npm:
+        name: neovim
+        global: true
+
+    - name: "Installing pynvim python module"
+      pip:
+        name: "pynvim"
+        state: "latest"
+
+    - name: "Installing neovim package"
+      dnf:
+        name: "neovim"
+        state: "latest"
+
+    - name: "Configuring neovim"
+      copy:
+        src: "files/nvim"
+        dest: "{{ [global_home, '.config/'] | path_join }}"
+
+    - name: "Installing additional libreoffice language packages"
+      dnf:
+        name: "libreoffice-langpack-de"
+        state: "latest"
+
+    - name: "Installing vlc flatpak"
+      flatpak:
+        name: "org.videolan.VLC"
+        state: "present"
+
+    - name: "Ensuring font directory exists"
+      file:
+        path: "{{ [global_home, '.fonts'] | path_join }}"
+        state: "directory"
+
+    - name: "Checking if Source Code Pro Nerd Font exists"
+      stat:
+        path: "{{ [global_home, '.fonts/SauceCodeProNerdFontMono-Regular.ttf'] | path_join }}"
+      register: "nf_font_check"
+
+    - name: "Installing Source Code Pro Nerd Font"
+      when: not nf_font_check.stat.exists
+      unarchive:
+        src: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.0/SourceCodePro.zip"
+        dest: "{{ [global_home, '.fonts/'] | path_join }}"
+        remote_src: "True"
+
+    - name: "Configuring bash"
+      template:
+        src: "{{ [playbook_dir, 'templates/bash/bashrc.j2'] | path_join }}"
+        dest: "{{ [global_home, '.bashrc'] | path_join }}"
+
+    - name: "Installing zsh package"
+      dnf:
+        name: "zsh"
+        state: "latest"
+
+    - name: "Ensuring directory for zsh configuration exists"
+      file:
+        path: "{{ [global_home, '.config/zsh'] | path_join }}"
+        state: "directory"
+
+    - name: "Configuring zsh"
+      copy:
+        src: "{{ item }}"
+        dest: "{{ [global_home, '.config/zsh/'] | path_join }}"
+      with_fileglob:
+        - "{{ [playbook_dir, 'files/zsh/*'] | path_join }}"
+        - "{{ [playbook_dir, 'files/zsh/.*'] | path_join }}"
+
+    - name: "Installing powerline10k zsh plugin"
+      git:
+        repo: "https://github.com/romkatv/powerlevel10k.git"
+        dest: "{{ [global_home, '.config/zsh/powerlevel10k'] | path_join }}"
+        clone: True
+        update: True
+        depth: 1
+
+    - name: "Installing syntax-highlighting zsh plugin"
+      git:
+        repo: "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+        dest: "{{ [global_home, '.config/zsh/zsh-syntax-highlighting'] | path_join }}"
+        clone: True
+        update: True
+
+    - name: "Installing zsh-autosuggestions zsh plugin"
+      git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions"
+        dest: "{{ [global_home, '.config/zsh/zsh-autosuggestions'] | path_join }}"
+        clone: True
+        update: True
+
+    - name: "Installing alacritty package"
+      dnf:
+        name: "alacritty"
+        state: "latest"
+
+    - name: "Configuring alacritty"
+      copy:
+        src: "{{ item }}"
+        dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
+      with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
+
+    - name: "Copying desktop wallpapers"
+      copy:
+        src: "{{ item }}"
+        dest: "/usr/share/wallpapers/custom/"
+      with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
+
+  #    - name: "Installing lightly kde application theme package"
+  #      dnf:
+  #        name: "lightly"
+  #        state: "latest"
+  #      register: kde_lightly_results
+
+  #    - name: "Installing catppuccin kde theme"
+  #      git:
+  #        repo: "https://github.com/catppuccin/kde"
+  #        dest: "{{ [global_home, '.config/kde/catppuccin-kde'] | path_join }}"
+  #        clone: True
+  #        update: True
+  #        depth: 1
+  #      register: kde_catppuccin_results
+
+  # manually select lightly as style for application, plasma and window decorations
+  # manully execute catppuccin colorscheme installer to set catppuccin as color scheme
+
+  #  - name: "Installing additional packages to build VMware Workstation kernel updates"
+  #    dnf:
+  #      name:
+  #        - "kernel-devel"
+  #        - "kernel-headers"
+  #        - "gcc"
+  #        - "gcc-c++"
+  #        - "make"
+  #      state: "latest"
+  #
+  #      # Download official bundle
+  #      # sudo ./VMware-Workstation-Full-16.2.5-20904516.x86_64.bundle --deferred-gtk --eulas-agreed
+  #
+  #  - name: "Copying VMware Workstation kernel update script"
+  #    copy:
+  #      src: "{{ [playbook_dir, 'files/vmware_workstation/99-vmmodules.install'] | path_join }}"
+  #      dest: "/etc/kernel/install.d/99-vmmodules.install"
+  #
+  #  - name: "Getting VMware Workstation version"
+  #    shell: "cat /etc/vmware/config | grep player.product.version | sed '/.*\"\(.*\)\".*/ s//\1/g'"
+  #    changed_when: False
+  #    register: vmware_version_check
+  #
+  #  - set_fact:
+  #      vmware_version: "{{ vmware_version_check.stdout }}"
+  #
+  #  - name: "Installing vmware host modules"
+  #    git:
+  #      repo: "https://github.com/mkubecek/vmware-host-modules.git"
+  #      dest: "/opt/vmware-host-modules"
+  #      clone: True
+  #      update: True
+  #      single_branch: True
+  #      version: "workstation-{{ vmware_version }}"
+  #
+  #  - name: "Make VMware Workstation modules"
+  #    make:
+  #      chdir: "/opt/vmware-host-modules"
+  #
+  #  - name: "Make install VMware Workstation modules"
+  #    make:
+  #      chdir: "/opt/vmware-host-modules"
+  #      target: "install"
 
   rescue:
     - set_fact: task_failed = True
-...
