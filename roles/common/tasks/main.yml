@@ -243,6 +243,19 @@
         name: "org.videolan.VLC"
         state: "present"
 
+    - name: "Installing obsidian flatpak"
+      flatpak:
+        name: "md.obsidian.Obsidian"
+        state: "present"
+
+    - name: "Configuring obsidian"
+      git:
+        repo: "git@github.com:Timon-Schwarz/pkm.git"
+        dest: "{{ [global_home, 'Desktop/00_pkm'] | path_join }}"
+        clone: True
+        accept_newhostkey: true
+      become: false
+
     - name: "Ensuring font directory exists"
       file:
         path: "{{ [global_home, '.fonts'] | path_join }}"
