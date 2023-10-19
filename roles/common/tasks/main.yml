@@ -178,8 +178,8 @@
       dnf:
         name:
           - "python3"
+          - "python3-neovim"
           - "pip"
-          - "pynvim"
         state: "latest"
 
     # Java
