@@ -132,6 +132,16 @@
         name: "@Development tools"
         state: "latest"
 
+    - name: "Install the 'C Development Tools and Libraries' package group"
+      ansible.builtin.dnf:
+        name: "C Development Tools and Libraries"
+        state: "latest"
+
+    - name: "Installing dkms package"
+      dnf:
+        name: "dkms"
+        state: "latest"
+
     - name: "Installing c++ compiler package"
       dnf:
         name: "gcc-c++"
@@ -248,11 +258,27 @@
         name: "md.obsidian.Obsidian"
         state: "present"
 
+    - name: "Install the graphviz package"
+      dnf:
+        name: "graphviz"
+        state: "latest"
+
+    - name: "Installing obsidian flatpak"
+      flatpak:
+        name: "md.obsidian.Obsidian"
+        state: "present"
+
+    - name: "Allowing obsidian flatpak to read graphviz file path"
+      shell:
+        cmd: "flatpak override md.obsidian.Obsidian --filesystem=/usr/bin/dot:ro"
+      # todo: add idempotency
+
     - name: "Configuring obsidian"
       git:
         repo: "git@github.com:Timon-Schwarz/pkm.git"
         dest: "{{ [global_home, 'Desktop/00_pkm'] | path_join }}"
-        clone: True
+        clone: true
+        update: false
         accept_newhostkey: true
       become: false
 
