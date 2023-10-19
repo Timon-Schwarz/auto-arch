@@ -12,6 +12,10 @@ This repository contains an Ansible script to automatically set up my desired Li
 It handels packages, Flatpacks, configuration files and many other things while still trying to be easy to use.
 I use it to keep the configuration of all my systems in sync.
 
+## Usage
+
+TODO
+
 ## Tasks that are not automated
 
 ### Jetbrains products
@@ -22,7 +26,7 @@ I use it to keep the configuration of all my systems in sync.
 - Install desired applications
 - Configure desired applications
 - For IDEA remove JDKs installed in home directory: `rm -rf ~/.jdks`
-- Setup system JDKs in IDEA via /var/run/host/usr/lib/jvm/java-\*
+- Setup system JDKs in IDEA via `/var/run/host/usr/lib/jvm/java-\*`
 
 ### Firefox openh264 codec plugin
 
