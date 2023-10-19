@@ -1,47 +1,55 @@
 ---
 - block:
-  - name: "Installing discord flatpak"
-    flatpak:
-      name: "com.discordapp.Discord"
-      state: "present"
+    #################
+    # Communication #
+    #################
+    - name: "Installing discord flatpak"
+      flatpak:
+        name: "com.discordapp.Discord"
+        state: "present"
 
-  - name: "Installing strongswan package"
-    dnf:
-      name: "strongswan"
-      state: "latest"
+    ########
+    # VPNs #
+    ########
+    - name: "Installing strongswan package"
+      dnf:
+        name: "strongswan"
+        state: "latest"
 
-  - name: "Configuring strongswan"
-    copy:
-      src: "{{ item }}"
-      dest: "/etc/strongswan/swanctl/conf.d/"
-    with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
+    - name: "Configuring strongswan"
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/strongswan/swanctl/conf.d/"
+      with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
 
-  - name: "Importing strongswan secrets"
-    copy:
-      src: "{{ item }}"
-      dest: "/etc/strongswan/swanctl/conf.d/"
-      owner: "root"
-      mode: 0600
-    with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
-    when:
-      - is_strongswan_secret_imported is undefined
-      - strongswan_secret_dir != ""
-    register: strongswan_secret_dir_results
+    - name: "Importing strongswan secrets"
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/strongswan/swanctl/conf.d/"
+        owner: "root"
+        mode: 0600
+      with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
+      when:
+        - is_strongswan_secret_imported is undefined
+        - strongswan_secret_dir != ""
+      register: strongswan_secret_dir_results
 
-  - name: "Updating host_vars files"
-    lineinfile:
-      dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
-      regexp: "is_strongswan_secret_imported:"
-      line: "is_strongswan_secret_imported: True"
-    when:
-      - strongswan_secret_dir_results is not failed
-      - strongswan_secret_dir_results is not skipped
+    - name: "Updating host_vars files"
+      lineinfile:
+        dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
+        regexp: "is_strongswan_secret_imported:"
+        line: "is_strongswan_secret_imported: True"
+      when:
+        - strongswan_secret_dir_results is not failed
+        - strongswan_secret_dir_results is not skipped
 
-  - name: "Installing anki flatpak"
-    flatpak:
-      name: "net.ankiweb.Anki"
-      state: "present"
+    ############
+    # Studying #
+    ############
+    - name: "Installing anki flatpak"
+      flatpak:
+        name: "net.ankiweb.Anki"
+        state: "present"
 
   rescue:
     - set_fact: task_failed = True
-...
