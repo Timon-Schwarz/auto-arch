@@ -259,11 +259,6 @@
         accept_newhostkey: true
       become: false
 
-    - name: "Installing full latex package"
-      dnf:
-        name: "texlive-scheme-full"
-        state: "latest"
-
     #########
     # Fonts #
     #########
