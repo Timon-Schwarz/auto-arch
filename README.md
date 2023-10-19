@@ -35,7 +35,7 @@ To enable it open Firefox, go to **"Settings" -> "Extensions" & "Themes" -> "Plu
 ### Eduroam
 
 - Download the setup assistant: https://cat.eduroam.org/
-- Execture the setup assistant: python3 ~/Downloads/eduroam-linux-TUoMT.py
+- Execture the setup assistant: `python3 ~/Downloads/eduroam-linux-TUoMT.py`
   - Use {{ username }}@eduroam.mwn.de as userid
 
 ### Eduvpn
