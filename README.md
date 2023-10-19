@@ -25,8 +25,6 @@ TODO
 - Setup toolbox: `/opt/jetbrains-toolbox-*/jetbrains-toolbox`
 - Install desired applications
 - Configure desired applications
-- For IDEA remove JDKs installed in home directory: `rm -rf ~/.jdks`
-- Setup system JDKs in IDEA via `/var/run/host/usr/lib/jvm/java-\*`
 
 ### Firefox openh264 codec plugin
 
