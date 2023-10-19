@@ -17,7 +17,7 @@ I use it to keep the configuration of all my systems in sync.
 ### Jetbrains products
 
 - Download toolbox: https://www.jetbrains.com/toolbox-app/download/download-thanks.html?platform=linux
-- Unpack toolbox: `sudo tar -xzf jetbrains-toolbox-*.tar.gz -C /opt`
+- Unpack toolbox: `sudo tar -xzf ~/Downloads/jetbrains-toolbox-*.tar.gz -C /opt`
 - Setup toolbox: `/opt/jetbrains-toolbox-*/jetbrains-toolbox`
 - Install desired applications
 
