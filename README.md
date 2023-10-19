@@ -31,3 +31,13 @@ TODO
 The packages required to use the openh264 codec in Firefox are installed but the plugin is not enabled within Firefox.
 
 To enable it open Firefox, go to **"Settings" -> "Extensions" & "Themes" -> "Plugins"** and set **"OpenH264 Video Codec provided by Cisco Systems, Inc."** to **"Always active"**.
+
+### Eduroam
+
+- Download the setup assistant: https://cat.eduroam.org/
+- Execture the setup assistant: python3 ~/Downloads/eduroam-linux-TUoMT.py
+  - Use {{ username }}@eduroam.mwn.de as userid
+
+### Eduvpn
+
+Allow the instructions for the current distribution from: https://python-eduvpn-client.readthedocs.io/en/master/
