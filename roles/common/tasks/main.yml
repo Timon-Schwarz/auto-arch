@@ -1,5 +1,8 @@
 ---
 - block:
+    ###########
+    # Updates #
+    ###########
     - name: "Updating packages"
       dnf:
         name: "*"
@@ -11,6 +14,9 @@
       register: "flatpak_update_results"
       changed_when: "'Nothing to do' not in flatpak_update_results.stdout"
 
+    ################
+    # Repositories #
+    ################
     - name: "Installing distribution gpg key package"
       dnf:
         name: "distribution-gpg-keys"
@@ -52,36 +58,9 @@
         state: "present"
         flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
 
-    - name: "Installing ansible package" # Must be installed already. This is here for consistency
-      dnf:
-        name: "ansible"
-        state: "latest"
-
-    - name: "Installing git package" # Must be installed already. This is here for consistency
-      dnf:
-        name: "git"
-        state: "latest"
-
-    - name: Enable copr for lazygit
-      community.general.copr:
-        name: atim/lazygit
-        state: enabled
-
-    - name: Installing lazygit
-      dnf:
-        name: lazygit
-        state: latest
-
-    - name: "Ensuring directory for git configuration exists"
-      file:
-        path: "{{ [global_home, '.config/git'] | path_join }}"
-        state: "directory"
-
-    - name: "Configuring git"
-      template:
-        src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
-        dest: "{{ [global_home, '.config/git/config'] | path_join }}"
-
+    #######
+    # SSH #
+    #######
     - name: "Installing ssh package"
       dnf:
         name: "openssh"
@@ -113,13 +92,18 @@
         - ssh_key_dir_results is not failed
         - ssh_key_dir_results is not skipped
 
+    ##############
+    # Multimedia #
+    ##############
     - name: "Install multimedia codec packages"
       dnf:
+        enablerepo: fedora-cisco-openh264
         name:
           - "gstreamer1-plugins-base"
           - "gstreamer1-plugins-good-*"
           - "gstreamer1-plugins-bad-*"
           - "gstreamer1-plugin-openh264"
+          - "mozilla-openh264"
           - "gstreamer1-libav"
           - "lame*"
         exclude:
@@ -127,6 +111,14 @@
           - "lame-devel"
         state: "latest"
 
+    - name: "Installing vlc flatpak"
+      flatpak:
+        name: "org.videolan.VLC"
+        state: "present"
+
+    ###############
+    # Build tools #
+    ###############
     - name: "Install the 'Development tools' package group"
       ansible.builtin.dnf:
         name: "@Development tools"
@@ -134,144 +126,129 @@
 
     - name: "Install the 'C Development Tools and Libraries' package group"
       ansible.builtin.dnf:
-        name: "C Development Tools and Libraries"
+        name: "@C Development Tools and Libraries"
         state: "latest"
 
-    - name: "Installing dkms package"
+    ###############
+    # Programming #
+    ###############
+    # Git
+    - name: "Installing git package"
       dnf:
-        name: "dkms"
+        name: "git"
         state: "latest"
 
-    - name: "Installing c++ compiler package"
-      dnf:
-        name: "gcc-c++"
-        state: "latest"
+    # Git
+    - name: "Ensuring directory for git configuration exists"
+      file:
+        path: "{{ [global_home, '.config/git'] | path_join }}"
+        state: "directory"
 
-    - name: "Installing ripgrep"
-      dnf:
-        name: "ripgrep"
-        state: "latest"
+    # Git
+    - name: "Configuring git"
+      template:
+        src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
+        dest: "{{ [global_home, '.config/git/config'] | path_join }}"
 
-    - name: "Installing fd-find"
-      dnf:
-        name: "fd-find"
-        state: "latest"
-
-    - name: "Installing pip package"
-      dnf:
-        name: "pip"
-        state: "latest"
-
-    - name: "Installing fish package"
-      dnf:
-        name: "fish"
-        state: "latest"
-
-    - name: "Installing ruby package"
-      dnf:
-        name: "ruby-devel"
-        state: "latest"
-
-    - name: "Installing ruby neovim package"
-      community.general.gem:
-        name: "neovim"
-        state: "latest"
-        user_install: false
-
-    - name: "Installing full latex package"
-      dnf:
-        name: "texlive-scheme-full"
-        state: "latest"
-
-    - name: "Installing nodejs package"
-      dnf:
-        name: "nodejs"
-        state: "latest"
-
-    - name: "Installing golang package"
-      dnf:
-        name: "golang"
-        state: "latest"
-
-    - name: "Installing rust package"
-      dnf:
-        name: "rust"
-        state: "latest"
-
-    - name: "Installing cargo package"
-      dnf:
-        name: "cargo"
-        state: "latest"
-
-    - name: "Installing julia package"
-      dnf:
-        name: "julia"
-        state: "latest"
-
-    - name: "Installing lua package"
-      dnf:
-        name: "lua"
-        state: "latest"
-
-    - name: "Installing luarocks package"
-      dnf:
-        name: "luarocks"
-        state: "latest"
-
-    - name: "Installing java-dev package"
-      dnf:
-        name: "java-latest-openjdk-devel"
-        state: "latest"
-
-    - name: Install neovim node.js package.
-      community.general.npm:
-        name: neovim
-        global: true
-
-    - name: "Installing pynvim python module"
-      pip:
-        name: "pynvim"
-        state: "latest"
-
+    # IDE
     - name: "Installing neovim package"
       dnf:
-        name: "neovim"
+        name:
+          - "neovim"
+          - "ripgrep"
+          - "fd-find"
         state: "latest"
 
+    # IDE
     - name: "Configuring neovim"
       copy:
         src: "files/nvim"
         dest: "{{ [global_home, '.config/'] | path_join }}"
 
-    - name: "Installing additional libreoffice language packages"
+    # Lua
+    - name: "Installing lua packages"
       dnf:
-        name: "libreoffice-langpack-de"
+        name:
+          - "lua"
+          - "luarocks"
         state: "latest"
 
-    - name: "Installing vlc flatpak"
-      flatpak:
-        name: "org.videolan.VLC"
-        state: "present"
+    # Python
+    - name: "Installing python packages"
+      dnf:
+        name:
+          - "python3"
+          - "pip"
+          - "pynvim"
+        state: "latest"
+
+    # Java
+    - name: "Installing java-17-openjdk-devel package"
+      dnf:
+        name: "java-17-openjdk-devel"
+        state: "latest"
+
+    # Nodejs
+    - name: "Installing nodejs package"
+      dnf:
+        name: "nodejs"
+        state: "latest"
+
+    # Nodejs
+    - name: Install neovim node.js package.
+      community.general.npm:
+        name: neovim
+        global: true
+
+    #    # Ruby
+    #    - name: "Installing ruby package"
+    #      dnf:
+    #        name: "ruby-devel"
+    #        state: "latest"
+    #
+    #    # Ruby
+    #    - name: "Installing ruby neovim package"
+    #      community.general.gem:
+    #        name: "neovim"
+    #        state: "latest"
+    #        user_install: false
+
+    #    # Go
+    #    - name: "Installing golang package"
+    #      dnf:
+    #        name: "golang"
+    #        state: "latest"
+
+    #    # Rust
+    #    - name: "Installing rust package"
+    #      dnf:
+    #        name:
+    #         - "rust"
+    #         - "cargo"
+    #        state: "latest"
+
+    #    # Julia
+    #    - name: "Installing julia package"
+    #      dnf:
+    #        name: "julia"
+    #        state: "latest"
+
+    ###########
+    # Writing #
+    ###########
+    - name: "Installing libreoffice packages"
+      dnf:
+        name:
+          - "libreoffice-writer"
+          - "libreoffice-calc"
+          - "libreoffice-langpack-de"
+          - "libreoffice-langpack-en"
+        state: "latest"
 
     - name: "Installing obsidian flatpak"
       flatpak:
         name: "md.obsidian.Obsidian"
         state: "present"
-
-    - name: "Install the graphviz package"
-      dnf:
-        name: "graphviz"
-        state: "latest"
-
-    - name: "Installing obsidian flatpak"
-      flatpak:
-        name: "md.obsidian.Obsidian"
-        state: "present"
-
-    - name: "Allowing obsidian flatpak to read graphviz file path"
-      shell:
-        cmd: "flatpak override md.obsidian.Obsidian --filesystem=/usr/bin/dot:ro"
-      # todo: add idempotency
 
     - name: "Configuring obsidian"
       git:
@@ -282,6 +259,14 @@
         accept_newhostkey: true
       become: false
 
+    - name: "Installing full latex package"
+      dnf:
+        name: "texlive-scheme-full"
+        state: "latest"
+
+    #########
+    # Fonts #
+    #########
     - name: "Ensuring font directory exists"
       file:
         path: "{{ [global_home, '.fonts'] | path_join }}"
@@ -299,6 +284,9 @@
         dest: "{{ [global_home, '.fonts/'] | path_join }}"
         remote_src: "True"
 
+    ##########
+    # Shells #
+    ##########
     - name: "Configuring bash"
       template:
         src: "{{ [playbook_dir, 'templates/bash/bashrc.j2'] | path_join }}"
@@ -344,6 +332,9 @@
         clone: True
         update: True
 
+    #############
+    # Terminals #
+    #############
     - name: "Installing alacritty package"
       dnf:
         name: "alacritty"
@@ -355,29 +346,14 @@
         dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
       with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
 
+    #######################
+    # Desktop environment #
+    #######################
     - name: "Copying desktop wallpapers"
       copy:
         src: "{{ item }}"
         dest: "/usr/share/wallpapers/custom/"
       with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
-
-  #    - name: "Installing lightly kde application theme package"
-  #      dnf:
-  #        name: "lightly"
-  #        state: "latest"
-  #      register: kde_lightly_results
-
-  #    - name: "Installing catppuccin kde theme"
-  #      git:
-  #        repo: "https://github.com/catppuccin/kde"
-  #        dest: "{{ [global_home, '.config/kde/catppuccin-kde'] | path_join }}"
-  #        clone: True
-  #        update: True
-  #        depth: 1
-  #      register: kde_catppuccin_results
-
-  # manually select lightly as style for application, plasma and window decorations
-  # manully execute catppuccin colorscheme installer to set catppuccin as color scheme
 
   #  - name: "Installing additional packages to build VMware Workstation kernel updates"
   #    dnf:

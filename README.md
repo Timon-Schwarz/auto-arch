@@ -20,3 +20,8 @@ I use it to keep the configuration of all my systems in sync.
 - Unpack toolbox: `sudo tar -xzf jetbrains-toolbox-*.tar.gz -C /opt`
 - Setup toolbox: `/opt/jetbrains-toolbox-*/jetbrains-toolbox`
 - Install desired applications
+
+### Firefox openh264 codec plugin
+
+The packages required to use the openh264 codec in Firefox are installed but the plugin is not enabled within Firefox.
+To enable it open Firefox, go to "Settings" -> "Extensions" & "Themes" -> "Plugins" and set "OpenH264 Video Codec provided by Cisco Systems, Inc." to "Always active".
