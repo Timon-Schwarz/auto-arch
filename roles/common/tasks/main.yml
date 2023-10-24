@@ -164,6 +164,8 @@
       copy:
         src: "files/nvim"
         dest: "{{ [global_home, '.config/'] | path_join }}"
+        owner: "{{ global_user }}"
+
 
     # Lua
     - name: "Installing lua packages"
