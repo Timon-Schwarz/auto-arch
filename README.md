@@ -14,7 +14,10 @@ I use it to keep the configuration of all my systems in sync.
 
 ## Usage
 
-TODO
+`git clone` the repository.
+`cd` into the newly created folder.
+`ansible-playbook local.yml --ask-become-pass`
+Now you can follow the instructions on screen.
 
 ## Tasks that are not automated
 

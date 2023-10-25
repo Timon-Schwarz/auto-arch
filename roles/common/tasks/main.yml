@@ -166,7 +166,6 @@
         dest: "{{ [global_home, '.config/'] | path_join }}"
         owner: "{{ global_user }}"
 
-
     # Lua
     - name: "Installing lua packages"
       dnf:
@@ -351,50 +350,6 @@
         src: "{{ item }}"
         dest: "/usr/share/wallpapers/custom/"
       with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
-
-  #  - name: "Installing additional packages to build VMware Workstation kernel updates"
-  #    dnf:
-  #      name:
-  #        - "kernel-devel"
-  #        - "kernel-headers"
-  #        - "gcc"
-  #        - "gcc-c++"
-  #        - "make"
-  #      state: "latest"
-  #
-  #      # Download official bundle
-  #      # sudo ./VMware-Workstation-Full-16.2.5-20904516.x86_64.bundle --deferred-gtk --eulas-agreed
-  #
-  #  - name: "Copying VMware Workstation kernel update script"
-  #    copy:
-  #      src: "{{ [playbook_dir, 'files/vmware_workstation/99-vmmodules.install'] | path_join }}"
-  #      dest: "/etc/kernel/install.d/99-vmmodules.install"
-  #
-  #  - name: "Getting VMware Workstation version"
-  #    shell: "cat /etc/vmware/config | grep player.product.version | sed '/.*\"\(.*\)\".*/ s//\1/g'"
-  #    changed_when: False
-  #    register: vmware_version_check
-  #
-  #  - set_fact:
-  #      vmware_version: "{{ vmware_version_check.stdout }}"
-  #
-  #  - name: "Installing vmware host modules"
-  #    git:
-  #      repo: "https://github.com/mkubecek/vmware-host-modules.git"
-  #      dest: "/opt/vmware-host-modules"
-  #      clone: True
-  #      update: True
-  #      single_branch: True
-  #      version: "workstation-{{ vmware_version }}"
-  #
-  #  - name: "Make VMware Workstation modules"
-  #    make:
-  #      chdir: "/opt/vmware-host-modules"
-  #
-  #  - name: "Make install VMware Workstation modules"
-  #    make:
-  #      chdir: "/opt/vmware-host-modules"
-  #      target: "install"
 
   rescue:
     - set_fact: task_failed = True
