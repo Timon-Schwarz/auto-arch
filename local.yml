@@ -47,7 +47,7 @@
       file:
         path: "{{ [inventory_dir, 'host_vars'] | path_join }}"
         state: "directory"
-  
+
     - name: "Ensuring host_vars file exists"
       file:
         path: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
@@ -97,7 +97,7 @@
       when: is_laptop is undefined
 
     - pause:
-        prompt: "Please enter the path to the folder containing your ssh keys [Press enter to skip]" 
+        prompt: "Please enter the path to the folder containing your ssh keys [Press enter to skip]"
         echo: "True"
       register: "prompt_ssh_key_dir"
       when: is_ssh_key_imported is undefined
@@ -140,10 +140,10 @@
       when: git_key_name is undefined
 
     - pause:
-        prompt: "Please enter the path to the folder containing your strongswan secrets [Press enter to skip]" 
+        prompt: "Please enter the path to the folder containing your strongswan secrets [Press enter to skip]"
         echo: "True"
       register: "prompt_strongswan_secret_dir"
-      when: 
+      when:
         - is_private | bool
         - is_strongswan_secret_imported is undefined
       until: prompt_strongswan_secret_dir is directory
@@ -152,7 +152,7 @@
 
     - set_fact:
         strongswan_secret_dir: "{{ prompt_strongswan_secret_dir.user_input }}"
-      when: 
+      when:
         - is_private | bool
         - is_strongswan_secret_imported is undefined
 
@@ -160,12 +160,12 @@
         prompt: "Please enter the vmware workstation version to use"
         echo: "True"
       register: "prompt_vmware_version"
-      when: 
+      when:
         - vmware_version is undefined
 
     - set_fact:
         vmware_version: "{{ prompt_vmware_version.user_input }}"
-      when: 
+      when:
         - vmware_version is undefined
 
     - name: "Updating host_vars files"
@@ -184,8 +184,6 @@
         - { "name": "git_key_name", "value": "{{ git_key_name }}" }
         - { "name": "vmware_version", "value": "{{ vmware_version }}" }
 
-
-
   tasks:
     - name: "Including common role"
       include_role:
@@ -195,18 +193,16 @@
       include_role:
         name: "work"
       when: is_work | bool
-    
+
     - name: "Including private role"
       include_role:
         name: "private"
       when: is_private | bool
-  
+
     - name: "Including laptop role"
       include_role:
         name: "laptop"
       when: is_laptop | bool
-
-
 
 - name: "Play | Cleaning up"
   hosts: "localhost"
@@ -215,4 +211,3 @@
     - name: "Removing orphaned packages"
       dnf:
         autoremove: True
-...
