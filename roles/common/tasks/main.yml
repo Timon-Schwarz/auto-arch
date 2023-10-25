@@ -368,5 +368,19 @@
         dest: "/usr/share/wallpapers/custom/"
       with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
 
+    ######################
+    # KVM virtualization #
+    ######################
+    - name: "Installing 'virtualization' package group"
+      dnf:
+        name: "@virtualization"
+        state: "latest"
+
+    - name: "Ensuring that libvirtd is started and enabled"
+      service:
+        name: "libvirtd"
+        state: "started"
+        enabled: True
+
   rescue:
     - set_fact: task_failed = True
