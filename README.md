@@ -9,7 +9,7 @@ The script is meant to be run on a fresh install of the latest Fedora KDE spin b
 ## The project
 
 This repository contains an Ansible script to automatically set up my desired Linux environment.
-It handels packages, Flatpacks, configuration files and many other things while still trying to be easy to use.
+It handles packages, Flatpacks, configuration files and many other things while still trying to be easy to use.
 I use it to keep the configuration of all my systems in sync.
 
 ## Usage
@@ -48,9 +48,9 @@ To enable it open Firefox, go to **"Settings" -> "Extensions" & "Themes" -> "Plu
 ### Eduroam
 
 - Download the setup assistant: https://cat.eduroam.org/
-- Execture the setup assistant: `python3 ~/Downloads/eduroam-linux-TUoMT.py`
+- Execute the setup assistant: `python3 ~/Downloads/eduroam-linux-TUoMT.py`
   - Use {{ username }}@eduroam.mwn.de as userid
 
 ### Eduvpn
 
-Allow the instructions for the current distribution from: https://python-eduvpn-client.readthedocs.io/en/master/
+Follow the instructions for the current distribution from: https://python-eduvpn-client.readthedocs.io/en/master/
