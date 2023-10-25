@@ -162,7 +162,7 @@
     # Git
     - name: "Configuring ssh for git"
       template:
-        src: "{{ [playbook_dir, 'templates/ssh/config.d/github,.j2'] | path_join }}"
+        src: "{{ [playbook_dir, 'templates/ssh/config.d/github.j2'] | path_join }}"
         dest: "{{ [global_home, '.config/ssh/config.d/github'] | path_join }}"
       when: git_key_name is defined
 
@@ -181,7 +181,6 @@
         src: "files/nvim"
         dest: "{{ [global_home, '.config/'] | path_join }}"
         owner: "{{ global_user }}"
-
 
     # Lua
     - name: "Installing lua packages"
