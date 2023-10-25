@@ -49,6 +49,8 @@
       copy:
         src: "{{ item }}"
         dest: "/etc/strongswan/swanctl/conf.d/"
+        owner: "root"
+        mode: 0640
       with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
       when:
         - is_strongswan_secret_imported is defined

@@ -75,6 +75,7 @@
       template:
         src: "{{ [playbook_dir, 'templates/ssh/config.j2'] | path_join }}"
         dest: "{{ [global_home, '.ssh/config'] | path_join }}"
+        owner: "{{ global_user }}"
 
     - name: "Ensuring directory for additional ssh confiugrations exists"
       file:
@@ -159,6 +160,7 @@
       template:
         src: "{{ [playbook_dir, 'templates/git/config.j2'] | path_join }}"
         dest: "{{ [global_home, '.config/git/config'] | path_join }}"
+        owner: "{{ global_user }}"
       when:
         - git_username is defined
         - git_email is defined
@@ -168,6 +170,7 @@
       template:
         src: "{{ [playbook_dir, 'templates/ssh/config.d/github.j2'] | path_join }}"
         dest: "{{ [global_home, '.ssh/config.d/github'] | path_join }}"
+        owner: "{{ global_user }}"
       when: git_key_name is defined
 
     # IDE
@@ -310,6 +313,7 @@
       template:
         src: "{{ [playbook_dir, 'templates/bash/bashrc.j2'] | path_join }}"
         dest: "{{ [global_home, '.bashrc'] | path_join }}"
+        owner: "{{ global_user }}"
 
     - name: "Installing zsh package"
       dnf:
@@ -325,6 +329,7 @@
       copy:
         src: "{{ item }}"
         dest: "{{ [global_home, '.config/zsh/'] | path_join }}"
+        owner: "{{ global_user }}"
       with_fileglob:
         - "{{ [playbook_dir, 'files/zsh/*'] | path_join }}"
         - "{{ [playbook_dir, 'files/zsh/.*'] | path_join }}"
@@ -363,6 +368,7 @@
       copy:
         src: "{{ item }}"
         dest: "{{ [global_home, '.config/alacritty/'] | path_join }}"
+        owner: "{{ global_user }}"
       with_fileglob: "{{ [playbook_dir, 'files/alacritty/*'] | path_join }}"
 
     #######################
@@ -372,6 +378,8 @@
       copy:
         src: "{{ item }}"
         dest: "/usr/share/wallpapers/custom/"
+        owner: "root"
+        mode: 0666
       with_fileglob: "{{ [playbook_dir, 'files/wallpapers/*'] | path_join }}"
 
     ######################
