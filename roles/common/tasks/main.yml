@@ -274,7 +274,8 @@
         update: false
         accept_newhostkey: true
       become: false
-      when: is_owner
+      when:
+        - is_owner is defined
 
     #########
     # Fonts #
