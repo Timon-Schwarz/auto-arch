@@ -58,19 +58,49 @@
         group: "{{ global_user }}"
 
     - pause:
+        prompt: "Are you the writer of this script? (Yes/No)"
+        echo: "True"
+      register: "prompt_is_owner"
+      until: (prompt_is_owner.user_input in bool_strings) or (prompt_is_owner.user_input | trim | length == 0)
+      retries: 3
+      delay: 0
+      when: is_owner is undefined
+
+    - set_fact:
+        is_owner: "{{ prompt_is_owner.user_input }}"
+      when:
+        - is_owner is undefined
+        - prompt_is_owner.user_input | trim | length > 0
+
+    - name: "Updating host_vars file with answer to the last question"
+      lineinfile:
+        dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
+        regexp: "{{ var.name }}:"
+        line: "{{ var.name }}: {{ var.value }}"
+      loop_control:
+        loop_var: "var"
+      loop:
+        - { "name": "is_owner", "value": "{{ is_owner }}" }
+      when:
+        - prompt_is_owner.user_input is defined
+        - prompt_is_owner.user_input | trim | length > 0
+
+    - pause:
         prompt: "Do you use this machine for work? (Yes/No)"
         echo: "True"
       register: "prompt_is_work"
-      when: is_work is undefined
-      until: prompt_is_work.user_input in bool_strings
+      until: (prompt_is_work.user_input in bool_strings) or (prompt_is_work | trim | length == 0)
       retries: 3
       delay: 0
+      when: is_work is undefined
 
     - set_fact:
         is_work: "{{ prompt_is_work.user_input }}"
-      when: is_work is undefined
+      when:
+        - is_work is undefined
+        - prompt_is_work.user_input | trim | length > 0
 
-    - name: "Updating host_vars files"
+    - name: "Updating host_vars file with answer to the last question"
       lineinfile:
         dest: "{{ [inventory_dir, 'host_vars/localhost'] | path_join }}"
         regexp: "{{ var.name }}:"
@@ -79,20 +109,24 @@
         loop_var: "var"
       loop:
         - { "name": "is_work", "value": "{{ is_work }}" }
-      when: is_work | trim | length > 0
+      when:
+        - prompt_is_work.user_input is defined
+        - prompt_is_work.user_input | trim | length > 0
 
     - pause:
         prompt: "Do you use this machine privately? (Yes/No)"
         echo: "True"
       register: "prompt_is_private"
-      when: is_private is undefined
-      until: prompt_is_private.user_input in bool_strings
+      until: (prompt_is_private.user_input in bool_strings) or (prompt_is_private | trim | length == 0)
       retries: 3
       delay: 0
+      when: is_private is undefined
 
     - set_fact:
         is_private: "{{ prompt_is_private.user_input }}"
-      when: is_private is undefined
+      when:
+        - is_private is undefined
+        - prompt_is_private.user_input | trim | length > 0
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -103,20 +137,24 @@
         loop_var: "var"
       loop:
         - { "name": "is_private", "value": "{{ is_private }}" }
-      when: is_private | trim | length > 0
+      when:
+        - prompt_is_private.user_input is defined
+        - prompt_is_private.user_input | trim | length > 0
 
     - pause:
         prompt: "Is this machine a laptop? (Yes/No)"
         echo: "True"
       register: "prompt_is_laptop"
-      when: is_laptop is undefined
-      until: prompt_is_laptop.user_input in bool_strings
+      until: (prompt_is_laptop.user_input in bool_strings) or (prompt_is_laptop | trim | length == 0)
       retries: 3
       delay: 0
+      when: is_laptop is undefined
 
     - set_fact:
         is_laptop: "{{ prompt_is_laptop.user_input }}"
-      when: is_laptop is undefined
+      when:
+        - is_laptop is undefined
+        - prompt_is_laptop.user_input | trim | length > 0
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -127,20 +165,24 @@
         loop_var: "var"
       loop:
         - { "name": "is_laptop", "value": "{{ is_laptop }}" }
-      when: is_laptop | trim | length > 0
+      when:
+        - prompt_is_laptop.user_input is defined
+        - prompt_is_laptop.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your ssh keys [Press enter to skip]"
+        prompt: "Please enter the path to the folder containing your ssh keys. [Blank to skip]"
         echo: "True"
       register: "prompt_ssh_key_dir"
-      when: is_ssh_key_imported is undefined
-      until: (prompt_ssh_key_dir.user_input is directory) or (prompt_ssh_key_dir | trim | length == 0)
+      until: (prompt_ssh_key_dir.user_input is directory) or (prompt_ssh_key_dir.user_input | trim | length == 0)
       retries: 3
       delay: 0
+      when: is_ssh_key_imported is undefined
 
     - set_fact:
         ssh_key_dir: "{{ prompt_ssh_key_dir.user_input }}"
-      when: (is_ssh_key_imported is undefined) and (prompt_ssh_key_dir | trim | length > 0)
+      when:
+        - is_ssh_key_imported is undefined
+        - prompt_ssh_key_dir.user_input | trim | length > 0
 
     - pause:
         prompt: "Please enter the username that should be used for git"
@@ -150,7 +192,9 @@
 
     - set_fact:
         git_username: "{{ prompt_git_username.user_input }}"
-      when: (git_username is undefined) and (git_username | trim | length > 0)
+      when:
+        - git_username is undefined
+        - prompt_git_username.user_input | trim | length > 0
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -161,7 +205,9 @@
         loop_var: "var"
       loop:
         - { "name": "git_username", "value": "{{ git_username }}" }
-      when: git_username | trim | length > 0
+      when:
+        - prompt_git_username.user_input is defined
+        - prompt_git_username.user_input | trim | length > 0
 
     - pause:
         prompt: "Please enter the email address that should be used for git"
@@ -171,7 +217,9 @@
 
     - set_fact:
         git_email: "{{ prompt_git_email.user_input }}"
-      when: (git_email is undefined) and (git_email | trim | length > 0)
+      when:
+        - git_email is undefined
+        - prompt_git_email.user_input | trim | length > 0
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -182,17 +230,21 @@
         loop_var: "var"
       loop:
         - { "name": "git_email", "value": "{{ git_email }}" }
-      when: git_email | trim | length > 0
+      when:
+        - prompt_git_email.user_input is defined
+        - prompt_git_email.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the private key name that should be used for git"
+        prompt: "Please enter the private key file name that should be used for git"
         echo: "True"
       register: "prompt_git_key_name"
       when: git_key_name is undefined
 
     - set_fact:
         git_key_name: "{{ prompt_git_key_name.user_input }}"
-      when: (git_key_name is undefined) and (git_key_name | trim | length > 0)
+      when:
+        - git_key_name is undefined
+        - prompt_git_key_name.user_input | trim | length > 0
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -203,16 +255,18 @@
         loop_var: "var"
       loop:
         - { "name": "git_key_name", "value": "{{ git_key_name }}" }
-      when: git_key_name | trim | length > 0
+      when:
+        - prompt_git_key_name.user_input is defined
+        - prompt_git_key_name.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your strongswan secrets [Press enter to skip]"
+        prompt: "Please enter the path to the folder containing your strongswan secrets. [Press enter to skip]"
         echo: "True"
       register: "prompt_strongswan_secret_dir"
       when:
         - is_private | bool
         - is_strongswan_secret_imported is undefined
-      until: (prompt_strongswan_secret_dir is directory) or (prompt_strongswan_secret_dir | trim | length == 0)
+      until: (prompt_strongswan_secret_dir.user_input is directory) or (prompt_strongswan_secret_dir.user_input | trim | length == 0)
       retries: 3
       delay: 0
 
@@ -220,7 +274,9 @@
         strongswan_secret_dir: "{{ prompt_strongswan_secret_dir.user_input }}"
       when:
         - is_private | bool
-        - (is_strongswan_secret_imported is undefined) and (prompt_strongswan_secret_dir | trim | length > 0)
+        - is_strongswan_secret_imported is undefined
+        - prompt_strongswan_secret_dir.user_input is defined
+        - prompt_strongswan_secret_dir.user_input | trim | length > 0
 
   tasks:
     - name: "Including common role"
@@ -230,17 +286,23 @@
     - name: "Including work role"
       include_role:
         name: "work"
-      when: is_work | bool
+      when:
+        - is_work is defined
+        - is_work | bool
 
     - name: "Including private role"
       include_role:
         name: "private"
-      when: is_private | bool
+      when:
+        - is_private is defined
+        - is_private | bool
 
     - name: "Including laptop role"
       include_role:
         name: "laptop"
-      when: is_laptop | bool
+      when:
+        - is_laptop is defined
+        - is_laptop | bool
 
 - name: "Play | Cleaning up"
   hosts: "localhost"
