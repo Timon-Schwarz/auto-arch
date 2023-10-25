@@ -281,7 +281,7 @@
       become: false
       when:
         - is_owner is defined
-        - is_owner
+        - is_owner | bool
 
     #########
     # Fonts #
