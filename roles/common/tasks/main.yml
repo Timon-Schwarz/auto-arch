@@ -385,7 +385,7 @@
     - name: "Ensuring that libvirtd is started and enabled"
       service:
         name: "libvirtd"
-        state: "started"
+        state: started
         enabled: True
 
   rescue:
