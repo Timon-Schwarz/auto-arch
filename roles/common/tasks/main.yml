@@ -66,18 +66,6 @@
         name: "openssh"
         state: "latest"
 
-    - name: "Importing ssh keys"
-      copy:
-        src: "{{ item }}"
-        dest: "{{ [global_home, '.ssh/'] | path_join }}"
-        owner: "{{ global_user }}"
-        mode: 0600
-      with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join }}"
-      when:
-        - is_ssh_key_imported is undefined
-        - ssh_key_dir is defined
-      register: ssh_key_dir_results
-
     - name: "Ensuring directory for ssh exists"
       file:
         path: "{{ [global_home, '.ssh'] | path_join }}"
@@ -92,6 +80,18 @@
       file:
         path: "{{ [global_home, '.ssh/config.d'] | path_join }}"
         state: "directory"
+
+    - name: "Importing ssh keys"
+      copy:
+        src: "{{ item }}"
+        dest: "{{ [global_home, '.ssh/'] | path_join }}"
+        owner: "{{ global_user }}"
+        mode: 0600
+      with_fileglob: "{{ [ssh_key_dir, '*key*'] | path_join }}"
+      when:
+        - is_ssh_key_imported is undefined
+        - ssh_key_dir is defined
+      register: ssh_key_dir_results
 
     - name: "Updating host_vars files"
       lineinfile:
