@@ -54,3 +54,9 @@ To enable it open Firefox, go to **"Settings" -> "Extensions" & "Themes" -> "Plu
 ### Eduvpn
 
 Follow the instructions for the current distribution from: https://python-eduvpn-client.readthedocs.io/en/master/
+
+## What is to come?
+
+1. Redo neovim configuration from scratch
+1. Try starship as prompt
+1. Setup tiling window manager
