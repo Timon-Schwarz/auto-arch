@@ -24,23 +24,17 @@
         name: "strongswan"
         state: "latest"
 
-    - name: "Configuring strongswan"
-      copy:
-        src: "{{ item }}"
-        dest: "/etc/strongswan/swanctl/conf.d/"
-      with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
-
     - name: "Importing strongswan secrets"
       copy:
         src: "{{ item }}"
         dest: "/etc/strongswan/swanctl/conf.d/"
         owner: "root"
         mode: 0600
-      with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
-      when:
-        - is_strongswan_secret_imported is undefined
-        - strongswan_secret_dir != ""
       register: strongswan_secret_dir_results
+      when:
+        - (is_strongswan_secret_imported is undefined) or (not is_strongswan_secret_imported)
+        - strongswan_secret_dir is defined
+      with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -50,6 +44,15 @@
       when:
         - strongswan_secret_dir_results is not failed
         - strongswan_secret_dir_results is not skipped
+
+    - name: "Configuring strongswan"
+      copy:
+        src: "{{ item }}"
+        dest: "/etc/strongswan/swanctl/conf.d/"
+      with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
+      when:
+        - is_strongswan_secret_imported is defined
+        - is_strongswan_secret_imported | bool
 
     ############
     # Studying #
