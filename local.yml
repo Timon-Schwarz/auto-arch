@@ -5,28 +5,12 @@
   become: True
   vars:
     bool_strings:
-      - "y"
-      - "Y"
       - "yes"
-      - "Yes"
-      - "YES"
-      - "n"
-      - "N"
       - "no"
-      - "No"
-      - "NO"
       - "true"
-      - "True"
-      - "TRUE"
       - "false"
-      - "False"
-      - "FALSE"
       - "on"
-      - "On"
-      - "ON"
       - "off"
-      - "Off"
-      - "OFF"
     global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
     global_editor: "nvim"
@@ -61,13 +45,13 @@
         prompt: "Are you the writer of this script? (Yes/No)"
         echo: "True"
       register: "prompt_is_owner"
-      until: (prompt_is_owner.user_input in bool_strings) or (prompt_is_owner.user_input | trim | length == 0)
+      until: (prompt_is_owner.user_input | lower in bool_strings) or (prompt_is_owner.user_input | trim | length == 0)
       retries: 3
       delay: 0
       when: is_owner is undefined
 
     - set_fact:
-        is_owner: "{{ prompt_is_owner.user_input }}"
+        is_owner: "{{ prompt_is_owner.user_input | lower | bool }}"
       when:
         - is_owner is undefined
         - prompt_is_owner.user_input | trim | length > 0
@@ -89,13 +73,13 @@
         prompt: "Do you use this machine for work? (Yes/No)"
         echo: "True"
       register: "prompt_is_work"
-      until: (prompt_is_work.user_input in bool_strings) or (prompt_is_work | trim | length == 0)
+      until: (prompt_is_work.user_input | lower in bool_strings) or (prompt_is_work | trim | length == 0)
       retries: 3
       delay: 0
       when: is_work is undefined
 
     - set_fact:
-        is_work: "{{ prompt_is_work.user_input }}"
+        is_work: "{{ prompt_is_work.user_input | lower | bool }}"
       when:
         - is_work is undefined
         - prompt_is_work.user_input | trim | length > 0
@@ -117,13 +101,13 @@
         prompt: "Do you use this machine privately? (Yes/No)"
         echo: "True"
       register: "prompt_is_private"
-      until: (prompt_is_private.user_input in bool_strings) or (prompt_is_private | trim | length == 0)
+      until: (prompt_is_private.user_input | lower in bool_strings) or (prompt_is_private | trim | length == 0)
       retries: 3
       delay: 0
       when: is_private is undefined
 
     - set_fact:
-        is_private: "{{ prompt_is_private.user_input }}"
+        is_private: "{{ prompt_is_private.user_input | lower | bool }}"
       when:
         - is_private is undefined
         - prompt_is_private.user_input | trim | length > 0
@@ -145,13 +129,13 @@
         prompt: "Is this machine a laptop? (Yes/No)"
         echo: "True"
       register: "prompt_is_laptop"
-      until: (prompt_is_laptop.user_input in bool_strings) or (prompt_is_laptop | trim | length == 0)
+      until: (prompt_is_laptop.user_input | lower in bool_strings) or (prompt_is_laptop | trim | length == 0)
       retries: 3
       delay: 0
       when: is_laptop is undefined
 
     - set_fact:
-        is_laptop: "{{ prompt_is_laptop.user_input }}"
+        is_laptop: "{{ prompt_is_laptop.user_input | lower | bool }}"
       when:
         - is_laptop is undefined
         - prompt_is_laptop.user_input | trim | length > 0
