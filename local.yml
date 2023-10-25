@@ -170,7 +170,7 @@
         - prompt_is_laptop.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your ssh keys. [Blank to skip]"
+        prompt: "Please enter the path to the folder containing your ssh keys. [Leave blank to skip]"
         echo: "True"
       register: "prompt_ssh_key_dir"
       until: (prompt_ssh_key_dir.user_input is directory) or (prompt_ssh_key_dir.user_input | trim | length == 0)
@@ -185,7 +185,7 @@
         - prompt_ssh_key_dir.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the username that should be used for git"
+        prompt: "Please enter the username that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_username"
       when: git_username is undefined
@@ -210,7 +210,7 @@
         - prompt_git_username.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the email address that should be used for git"
+        prompt: "Please enter the email address that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_email"
       when: git_email is undefined
@@ -235,7 +235,7 @@
         - prompt_git_email.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the private key file name that should be used for git"
+        prompt: "Please enter the private key file name that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_key_name"
       when: git_key_name is undefined
@@ -260,7 +260,7 @@
         - prompt_git_key_name.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your strongswan secrets. [Press enter to skip]"
+        prompt: "Please enter the path to the folder containing your strongswan secrets. [Leave blank to skip]"
         echo: "True"
       register: "prompt_strongswan_secret_dir"
       when:
