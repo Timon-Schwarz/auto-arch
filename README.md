@@ -15,7 +15,7 @@ I use it to keep the configuration of all my systems in sync.
 ## Usage
 
 1. Install the latest Fedora KDE spin
-1. `dnf install ansible`
+1. `dnf install ansible git`
 1. `git clone https://github.com/Timon-Schwarz/personal-autosetup-fedora.git`
 1. `cd personal-autosetup-fedora`
 1. `ansible-playbook local.yml --ask-become-pass`
