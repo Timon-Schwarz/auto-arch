@@ -78,6 +78,11 @@
         - ssh_key_dir is defined
       register: ssh_key_dir_results
 
+    - name: "Ensuring directory for ssh exists"
+      file:
+        path: "{{ [global_home, '.ssh'] | path_join }}"
+        state: "directory"
+
     - name: "Configuring ssh"
       template:
         src: "{{ [playbook_dir, 'templates/ssh/config.j2'] | path_join }}"
