@@ -30,10 +30,11 @@
         dest: "/etc/strongswan/swanctl/conf.d/"
         owner: "root"
         mode: 0600
-      with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
       register: strongswan_secret_dir_results
       when:
         - (is_strongswan_secret_imported is undefined) or (not is_strongswan_secret_imported)
+        - strongswan_secret_dir is defined
+      with_fileglob: "{{ [strongswan_secret_dir, '*.conf'] | path_join }}"
 
     - name: "Updating host_vars files"
       lineinfile:
@@ -50,7 +51,8 @@
         dest: "/etc/strongswan/swanctl/conf.d/"
       with_fileglob: "{{ [playbook_dir, 'files/strongswan/swanctl/*.conf'] | path_join }}"
       when:
-        - (is_strongswan_secret_imported is undefined) or (not is_strongswan_secret_imported)
+        - is_strongswan_secret_imported is defined
+        - is_strongswan_secret_imported | bool
 
     ############
     # Studying #
