@@ -216,6 +216,20 @@
         name: neovim
         global: true
 
+    # Go
+    - name: "Installing golang package"
+      dnf:
+        name: "golang"
+        state: "latest"
+
+    # Rust
+    - name: "Installing rust package"
+      dnf:
+        name:
+          - "rust"
+          - "cargo"
+        state: "latest"
+
     #    # Ruby
     #    - name: "Installing ruby package"
     #      dnf:
@@ -228,20 +242,6 @@
     #        name: "neovim"
     #        state: "latest"
     #        user_install: false
-
-    #    # Go
-    #    - name: "Installing golang package"
-    #      dnf:
-    #        name: "golang"
-    #        state: "latest"
-
-    #    # Rust
-    #    - name: "Installing rust package"
-    #      dnf:
-    #        name:
-    #         - "rust"
-    #         - "cargo"
-    #        state: "latest"
 
     #    # Julia
     #    - name: "Installing julia package"
