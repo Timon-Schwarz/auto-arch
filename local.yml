@@ -5,28 +5,12 @@
   become: True
   vars:
     bool_strings:
-      - "y"
-      - "Y"
       - "yes"
-      - "Yes"
-      - "YES"
-      - "n"
-      - "N"
       - "no"
-      - "No"
-      - "NO"
       - "true"
-      - "True"
-      - "TRUE"
       - "false"
-      - "False"
-      - "FALSE"
       - "on"
-      - "On"
-      - "ON"
       - "off"
-      - "Off"
-      - "OFF"
     global_user: "{{ lookup('env', 'USER') }}"
     global_home: "{{ lookup('env', 'HOME') }}"
     global_editor: "nvim"
@@ -61,13 +45,13 @@
         prompt: "Are you the writer of this script? (Yes/No)"
         echo: "True"
       register: "prompt_is_owner"
-      until: (prompt_is_owner.user_input in bool_strings) or (prompt_is_owner.user_input | trim | length == 0)
+      until: (prompt_is_owner.user_input | lower in bool_strings) or (prompt_is_owner.user_input | trim | length == 0)
       retries: 3
       delay: 0
       when: is_owner is undefined
 
     - set_fact:
-        is_owner: "{{ prompt_is_owner.user_input }}"
+        is_owner: "{{ prompt_is_owner.user_input | lower | bool }}"
       when:
         - is_owner is undefined
         - prompt_is_owner.user_input | trim | length > 0
@@ -89,13 +73,13 @@
         prompt: "Do you use this machine for work? (Yes/No)"
         echo: "True"
       register: "prompt_is_work"
-      until: (prompt_is_work.user_input in bool_strings) or (prompt_is_work | trim | length == 0)
+      until: (prompt_is_work.user_input | lower in bool_strings) or (prompt_is_work | trim | length == 0)
       retries: 3
       delay: 0
       when: is_work is undefined
 
     - set_fact:
-        is_work: "{{ prompt_is_work.user_input }}"
+        is_work: "{{ prompt_is_work.user_input | lower | bool }}"
       when:
         - is_work is undefined
         - prompt_is_work.user_input | trim | length > 0
@@ -117,13 +101,13 @@
         prompt: "Do you use this machine privately? (Yes/No)"
         echo: "True"
       register: "prompt_is_private"
-      until: (prompt_is_private.user_input in bool_strings) or (prompt_is_private | trim | length == 0)
+      until: (prompt_is_private.user_input | lower in bool_strings) or (prompt_is_private | trim | length == 0)
       retries: 3
       delay: 0
       when: is_private is undefined
 
     - set_fact:
-        is_private: "{{ prompt_is_private.user_input }}"
+        is_private: "{{ prompt_is_private.user_input | lower | bool }}"
       when:
         - is_private is undefined
         - prompt_is_private.user_input | trim | length > 0
@@ -145,13 +129,13 @@
         prompt: "Is this machine a laptop? (Yes/No)"
         echo: "True"
       register: "prompt_is_laptop"
-      until: (prompt_is_laptop.user_input in bool_strings) or (prompt_is_laptop | trim | length == 0)
+      until: (prompt_is_laptop.user_input | lower in bool_strings) or (prompt_is_laptop | trim | length == 0)
       retries: 3
       delay: 0
       when: is_laptop is undefined
 
     - set_fact:
-        is_laptop: "{{ prompt_is_laptop.user_input }}"
+        is_laptop: "{{ prompt_is_laptop.user_input | lower | bool }}"
       when:
         - is_laptop is undefined
         - prompt_is_laptop.user_input | trim | length > 0
@@ -170,7 +154,7 @@
         - prompt_is_laptop.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your ssh keys. [Blank to skip]"
+        prompt: "Please enter the path to the folder containing your ssh keys. [Leave blank to skip]"
         echo: "True"
       register: "prompt_ssh_key_dir"
       until: (prompt_ssh_key_dir.user_input is directory) or (prompt_ssh_key_dir.user_input | trim | length == 0)
@@ -185,7 +169,7 @@
         - prompt_ssh_key_dir.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the username that should be used for git"
+        prompt: "Please enter the username that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_username"
       when: git_username is undefined
@@ -210,7 +194,7 @@
         - prompt_git_username.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the email address that should be used for git"
+        prompt: "Please enter the email address that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_email"
       when: git_email is undefined
@@ -235,7 +219,7 @@
         - prompt_git_email.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the private key file name that should be used for git"
+        prompt: "Please enter the private key file name that should be used for git. [Leave blank to skip]"
         echo: "True"
       register: "prompt_git_key_name"
       when: git_key_name is undefined
@@ -260,7 +244,7 @@
         - prompt_git_key_name.user_input | trim | length > 0
 
     - pause:
-        prompt: "Please enter the path to the folder containing your strongswan secrets. [Press enter to skip]"
+        prompt: "Please enter the path to the folder containing your strongswan secrets. [Leave blank to skip]"
         echo: "True"
       register: "prompt_strongswan_secret_dir"
       when:
