@@ -4,7 +4,7 @@
 -- Replace whitespace markers with space
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "",
-  command = "silent! :%s/ / /g",
+  command = "silent! :%s/\\%u23b5/ /g",
 })
 
 -- Don't auto commenting new lines
