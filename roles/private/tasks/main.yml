@@ -64,5 +64,14 @@
         name: "net.ankiweb.Anki"
         state: "present"
 
+    - name: "Adding qtrvsim package"
+      tags:
+        - manual
+        - unsave
+      dnf:
+        name: "https://download.opensuse.org/repositories/home:/jdupak/Fedora_37/x86_64/qtrvsim-0.9.5-3.1.x86_64.rpm"
+        state: "latest"
+        disable_gpg_check: True
+
   rescue:
     - set_fact: task_failed = True
