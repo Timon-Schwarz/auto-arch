@@ -55,6 +55,11 @@ To enable it open Firefox, go to **"Settings" -> "Extensions" & "Themes" -> "Plu
 
 Follow the instructions for the current distribution from: https://python-eduvpn-client.readthedocs.io/en/master/
 
+### qtrvsim
+
+1. `dnf config-manager --add-repo https://download.opensuse.org/repositoies/home:jdupak/Fedora_37/home:jdupak.repo`
+1. `dnf install qtrvsim`
+
 ## What is to come?
 
 1. Redo neovim configuration from scratch
