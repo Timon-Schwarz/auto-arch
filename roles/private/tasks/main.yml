@@ -64,12 +64,5 @@
         name: "net.ankiweb.Anki"
         state: "present"
 
-    - name: Enable project Test of the user schlupov
-      community.general.copr:
-        host: copr.fedorainfracloud.org
-        state: enabled
-        name: schlupov/Test
-        chroot: fedora-31-x86_64
-
   rescue:
     - set_fact: task_failed = True
